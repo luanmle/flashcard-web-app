@@ -1,0 +1,12 @@
+[
+  {
+    "front_content": "Como fatiar um DataFrame do Pandas pelos valores do índice utilizando localização explícita?",
+    "back_content": "Utiliza-se o método .loc[first:last]. O índice deve estar ordenado com .sort_index() antes do fatiamento.",
+    "tags": "pandas,data-science"
+  },
+  {
+    "front_content": "Qual o prazo do aviso prévio proporcional ao tempo de serviço de acordo com a CLT?",
+    "back_content": "O aviso prévio é de no mínimo 30 dias, acrescidos de 3 dias por ano de serviço prestado na mesma empresa, até o limite de 60 dias, perfazendo um total máximo de 90 dias.",
+    "tags": "direito-do-trabalho,clt"
+  }
+]
