@@ -42,17 +42,6 @@
                 </div>
             </div>
 
-            <!-- Deck -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Deck</label>
-                <select id="deck-select" class="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-200" disabled>
-                    <option value="">-- Select a Deck --</option>
-                </select>
-                <div class="mt-2 flex gap-2">
-                    <input type="text" id="new-deck-title" placeholder="New Deck Title" class="flex-1 p-2 border rounded text-sm disabled:bg-gray-200" disabled>
-                    <button onclick="createDeck()" id="btn-create-deck" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded text-sm font-semibold disabled:opacity-50" disabled>Create</button>
-                </div>
-            </div>
         </div>
 
         <!-- Right Column: Card Creation -->
@@ -162,9 +151,8 @@
         const newSubInput = document.getElementById('new-subtopic-name');
         const btnSub = document.getElementById('btn-create-subtopic');
 
-        // Reset subtopic & deck
+        // Reset subtopic
         subSelect.innerHTML = '<option value="">-- Select a Subtopic --</option>';
-        document.getElementById('deck-select').innerHTML = '<option value="">-- Select a Deck --</option>';
 
         if (!topicId) {
             subSelect.disabled = true;
@@ -184,35 +172,6 @@
             const filtered = subtopics.filter(s => s.topic_id === topicId);
             filtered.forEach(s => {
                 subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-            });
-        } catch(e) { console.error(e); }
-    }
-
-    async function onSubtopicChange() {
-        const subtopicId = document.getElementById('subtopic-select').value;
-        const deckSelect = document.getElementById('deck-select');
-        const newDeckInput = document.getElementById('new-deck-title');
-        const btnDeck = document.getElementById('btn-create-deck');
-
-        deckSelect.innerHTML = '<option value="">-- Select a Deck --</option>';
-
-        if (!subtopicId) {
-            deckSelect.disabled = true;
-            newDeckInput.disabled = true;
-            btnDeck.disabled = true;
-            return;
-        }
-
-        deckSelect.disabled = false;
-        newDeckInput.disabled = false;
-        btnDeck.disabled = false;
-
-        try {
-            const res = await fetch('/api/decks/');
-            const decks = await res.json();
-            const filtered = decks.filter(d => d.user_id === USER_ID);
-            filtered.forEach(d => {
-                deckSelect.innerHTML += `<option value="${d.id}">${d.title}</option>`;
             });
         } catch(e) { console.error(e); }
     }
@@ -254,32 +213,15 @@
         } catch(e) { console.error(e); }
     }
 
-    async function createDeck() {
-        const title = document.getElementById('new-deck-title').value.trim();
-        if (!title) return;
-        try {
-            const res = await fetch('/api/decks/', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({title: title, user_id: USER_ID})
-            });
-            if (res.ok) {
-                document.getElementById('new-deck-title').value = '';
-                await onSubtopicChange();
-                showStatus(`Deck '${title}' created!`);
-            }
-        } catch(e) { console.error(e); }
-    }
-
     async function createCard() {
-        const deckId = document.getElementById('deck-select').value;
         const subtopicId = document.getElementById('subtopic-select').value;
         const front = document.getElementById('front-content').value.trim();
         const back = document.getElementById('back-content').value.trim();
         const tags = document.getElementById('card-tags').value.trim();
         const type = document.querySelector('input[name="card_type"]:checked').value;
 
-        if (!deckId || !subtopicId) {
-            showStatus("Please select a Subtopic and a Deck first.", true);
+        if (!subtopicId) {
+            showStatus("Please select a Subtopic first.", true);
             return;
         }
         if (!front || !back) {
@@ -288,7 +230,6 @@
         }
 
         const payload = {
-            deck_id: deckId,
             subtopic_id: subtopicId,
             front_content: front,
             back_content: back,

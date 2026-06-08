@@ -52,13 +52,13 @@ class Deck(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     author = relationship("User", back_populates="decks")
-    cards = relationship("Card", back_populates="deck", cascade="all, delete-orphan")
+    # cards relationship removed because cards no longer have deck_id
 
 class Card(Base):
     __tablename__ = "cards"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    deck_id = Column(String, ForeignKey("decks.id"), nullable=False)
+    # deck_id removed to decouple Card from Deck directly
     subtopic_id = Column(String, ForeignKey("subtopics.id"), nullable=False)
     front_content = Column(Text, nullable=False)
     back_content = Column(Text, nullable=False)
@@ -67,7 +67,6 @@ class Card(Base):
     card_type = Column(String, default="basic")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    deck = relationship("Deck", back_populates="cards")
     subtopic = relationship("Subtopic", back_populates="cards")
     reviews = relationship("Review", back_populates="card", cascade="all, delete-orphan")
     user_states = relationship("UserCardState", back_populates="card", cascade="all, delete-orphan")

@@ -95,7 +95,6 @@ class DeckResponse(DeckBase):
 # Card Schemas
 # ==========================================
 class CardBase(BaseModel):
-    deck_id: str
     subtopic_id: str
     front_content: str
     back_content: str
@@ -118,7 +117,6 @@ class CardResponse(CardBase):
     created_at: datetime
 
     # Extended properties for breadcrumbs when queried directly
-    deck_title: Optional[str] = None
     subtopic_name: Optional[str] = None
     topic_name: Optional[str] = None
 

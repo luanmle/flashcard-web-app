@@ -13,7 +13,7 @@
 
     <!-- Breadcrumbs -->
     <div class="w-full mb-2 px-4 flex text-sm text-gray-500 hidden" id="breadcrumbs-container">
-        <span id="bc-topic"></span>&nbsp;>&nbsp;<span id="bc-subtopic"></span>&nbsp;>&nbsp;<span id="bc-deck" class="font-semibold text-gray-700"></span>
+        <span id="bc-topic"></span>&nbsp;>&nbsp;<span id="bc-subtopic" class="font-semibold text-gray-700"></span>
     </div>
 
     <!-- The Flashcard -->
@@ -112,11 +112,11 @@
         try {
             // Extract optional filter params
             const params = new URLSearchParams(window.location.search);
-            const deckId = params.get('deck_id');
+            const smartDeckId = params.get('smart_deck_id');
 
             let url = `/api/study/due/${USER_ID}`;
-            if (deckId) {
-                url += `?deck_id=${deckId}`;
+            if (smartDeckId) {
+                url += `?smart_deck_id=${smartDeckId}`;
             }
 
             const res = await fetch(url);
@@ -200,7 +200,6 @@
                 if(currentCardData.topic_name) {
                     document.getElementById('bc-topic').innerText = currentCardData.topic_name;
                     document.getElementById('bc-subtopic').innerText = currentCardData.subtopic_name;
-                    document.getElementById('bc-deck').innerText = currentCardData.deck_title;
                     document.getElementById('breadcrumbs-container').classList.remove('hidden');
                 }
 

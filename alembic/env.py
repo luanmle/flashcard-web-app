@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 # Import the database URL and Base metadata
 from app.core.database import DATABASE_URL, Base
 import app.models.flashcards  # Ensure models are loaded
+import app.models.smart_decks # Ensure SmartDecks are loaded
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -25,8 +25,6 @@ def read_card(card_id: str, db: Session = Depends(get_db)):
     # We populate the extended properties for breadcrumbs dynamically
     response_data = CardResponse.model_validate(db_card)
 
-    if db_card.deck:
-        response_data.deck_title = db_card.deck.title
     if db_card.subtopic:
         response_data.subtopic_name = db_card.subtopic.name
         if db_card.subtopic.topic:
