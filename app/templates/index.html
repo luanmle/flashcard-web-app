@@ -33,7 +33,33 @@
     </div>
 </div>
 
+<!-- Analytics Section -->
+<div id="analytics-section" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mt-6 hidden">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Your Analytics</h2>
+
+    <div class="mb-4">
+        <p class="text-gray-600">Total Reviews Completed: <span id="total-reviews" class="font-bold text-xl text-blue-600">0</span></p>
+    </div>
+
+    <!-- Chart.js Canvas -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold mb-2">Avg. Hesitation (Seconds) by Topic</h3>
+        <canvas id="durationChart" height="100"></canvas>
+    </div>
+
+    <!-- Hardest Cards Table -->
+    <div>
+        <h3 class="text-lg font-semibold mb-2 text-red-600">Cards You Struggle With (Lowest Ratings)</h3>
+        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+            <ul id="hardest-cards-list" class="list-disc pl-5 text-sm text-gray-700 space-y-2">
+                <!-- Injected via JS -->
+            </ul>
+        </div>
+    </div>
+</div>
+
 <script>
+    let durationChartInstance = null;
     async function loginOrCreateUser() {
         const username = document.getElementById('username-input').value;
         const email = document.getElementById('email-input').value;
@@ -70,6 +96,7 @@
             document.getElementById('user-status').classList.remove('hidden');
 
             await checkDueCards(userId);
+            await loadAnalytics(userId);
 
         } catch (error) {
             console.error(error);
@@ -100,6 +127,70 @@
         }
     }
 
+    async function loadAnalytics(userId) {
+        document.getElementById('analytics-section').classList.remove('hidden');
+        try {
+            const res = await fetch(`/api/analytics/${userId}`);
+            if (!res.ok) return;
+            const data = await res.json();
+
+            document.getElementById('total-reviews').innerText = data.total_reviews;
+
+            // Hardest Cards List
+            const listEl = document.getElementById('hardest-cards-list');
+            listEl.innerHTML = "";
+            if (data.hardest_cards && data.hardest_cards.length > 0) {
+                data.hardest_cards.forEach(card => {
+                    listEl.innerHTML += `<li><strong>[Rating ${card.avg_rating}]</strong> ${card.card_front}</li>`;
+                });
+            } else {
+                listEl.innerHTML = "<li>No data available yet. Keep studying!</li>";
+            }
+
+            // Render Chart.js
+            const ctx = document.getElementById('durationChart').getContext('2d');
+
+            // Destroy previous instance if it exists
+            if (durationChartInstance) {
+                durationChartInstance.destroy();
+            }
+
+            const topics = Object.keys(data.avg_duration_by_topic || {});
+            const durations = Object.values(data.avg_duration_by_topic || {});
+
+            if (topics.length > 0) {
+                durationChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: topics,
+                        datasets: [{
+                            label: 'Avg Duration (s)',
+                            data: durations,
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Clear canvas or show message
+                durationChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: ['No data'], datasets: [{ data: [0] }] }
+                });
+            }
+        } catch (e) {
+            console.error("Failed to load analytics", e);
+        }
+    }
+
     function startStudying() {
         const userId = localStorage.getItem('currentUserId');
         if (userId) {
@@ -120,6 +211,7 @@
         if (userId) {
             document.getElementById('setup-section').classList.add('hidden');
             checkDueCards(userId);
+            loadAnalytics(userId);
         }
     };
 </script>
