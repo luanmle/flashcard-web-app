@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Flashcards SRS{% endblock %}
+{% block title %}Dashboard - DashWind SRS{% endblock %}
+{% block header_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto space-y-8">
+<div class="max-w-7xl mx-auto space-y-6">
 
-    <!-- User Setup Card -->
+    <!-- User Setup Card (MVP only) -->
     <div id="setup-section" class="card bg-base-100 shadow-xl border border-primary">
         <div class="card-body">
             <h2 class="card-title text-primary">1. Select or Create User</h2>
@@ -18,64 +19,92 @@
         </div>
     </div>
 
-    <!-- Study Section (SmartDecks) -->
-    <div id="study-section" class="hidden space-y-6">
-        <div class="flex justify-between items-center border-b pb-2 border-base-300">
-            <h2 class="text-3xl font-bold">Your SmartDecks</h2>
-            <!-- Modal trigger -->
-            <button class="btn btn-outline btn-secondary" onclick="document.getElementById('create_smartdeck_modal').showModal()">
-                + Create SmartDeck
-            </button>
-        </div>
+    <div id="study-section" class="hidden space-y-8">
 
-        <div id="smart-decks-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- SmartDeck Cards will be injected here -->
-        </div>
+        <!-- Top Stats (DashWind style) -->
+        <div class="grid lg:grid-cols-4 mt-2 md:grid-cols-2 grid-cols-1 gap-6">
 
-        <div class="divider">OR</div>
+            <div class="stats shadow bg-base-100">
+                <div class="stat">
+                    <div class="stat-figure text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                    </div>
+                    <div class="stat-title text-base-content/70">Total Reviews</div>
+                    <div id="total-reviews" class="stat-value text-primary">0</div>
+                    <div class="stat-desc font-bold text-success">Keep it up!</div>
+                </div>
+            </div>
 
-        <div class="card bg-base-100 shadow-md border border-base-200">
-            <div class="card-body items-center text-center">
-                <h3 class="card-title">Create Content</h3>
-                <p class="text-base-content/70">Want to create new flashcards or import data?</p>
-                <div class="card-actions mt-4 w-full">
-                    <button onclick="openStudio()" class="btn btn-neutral w-full">
-                        Open Flashcard Studio
-                    </button>
+            <div class="stats shadow bg-base-100">
+                <div class="stat">
+                    <div class="stat-figure text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                    </div>
+                    <div class="stat-title text-base-content/70">SmartDecks</div>
+                    <div id="stat-smartdecks-count" class="stat-value text-secondary">0</div>
+                    <div class="stat-desc text-base-content/60">Custom Filters</div>
+                </div>
+            </div>
+
+            <div class="stats shadow bg-base-100">
+                <div class="stat">
+                    <div class="stat-figure text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <div class="stat-title text-base-content/70">Hardest Topic</div>
+                    <div id="stat-hardest-topic" class="stat-value text-accent text-xl">N/A</div>
+                    <div class="stat-desc text-base-content/60">Needs attention</div>
+                </div>
+            </div>
+
+            <div class="stats shadow bg-base-100 cursor-pointer hover:shadow-lg transition-shadow" onclick="document.getElementById('create_smartdeck_modal').showModal()">
+                <div class="stat flex flex-col items-center justify-center h-full">
+                    <div class="text-primary opacity-80">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    </div>
+                    <div class="stat-title font-semibold text-primary mt-1">Create SmartDeck</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Analytics Section -->
-    <div id="analytics-section" class="hidden space-y-6">
-        <div class="border-b pb-2 border-base-300">
-            <h2 class="text-3xl font-bold">Your Analytics</h2>
-        </div>
-
-        <div class="stats shadow bg-base-100 w-full mb-6">
-            <div class="stat">
-                <div class="stat-title">Total Reviews Completed</div>
-                <div id="total-reviews" class="stat-value text-primary">0</div>
+        <!-- SmartDecks Grid -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold mb-4 text-base-content">Study Queues</h2>
+            <div id="smart-decks-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards injected here -->
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Charts & Analytics (DashWind style) -->
+        <div class="grid lg:grid-cols-2 mt-8 grid-cols-1 gap-6">
+
             <!-- Chart -->
             <div class="card bg-base-100 shadow-md">
                 <div class="card-body">
-                    <h3 class="card-title text-lg mb-2">Avg. Hesitation (Seconds) by Topic</h3>
-                    <canvas id="durationChart" height="200"></canvas>
+                    <h3 class="card-title text-lg mb-2 font-normal text-base-content/80">Avg. Hesitation (Seconds) by Topic</h3>
+                    <div class="w-full h-64">
+                        <canvas id="durationChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Hardest Cards -->
-            <div class="card bg-error/10 border border-error/20 shadow-md">
+            <!-- Hardest Cards Table -->
+            <div class="card bg-base-100 shadow-md">
                 <div class="card-body">
-                    <h3 class="card-title text-error mb-2">Cards You Struggle With (Lowest Ratings)</h3>
-                    <ul id="hardest-cards-list" class="list-disc pl-5 text-sm space-y-2 text-base-content/80">
-                        <!-- Injected via JS -->
-                    </ul>
+                    <h3 class="card-title text-lg mb-2 font-normal text-base-content/80">Cards You Struggle With (Lowest Ratings)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full">
+                            <thead>
+                                <tr>
+                                    <th>Rating</th>
+                                    <th>Front Content</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hardest-cards-list">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -110,9 +139,8 @@
 
         <div class="modal-action">
             <form method="dialog">
-                <!-- if there is a button in form, it will close the modal -->
-                <button class="btn mr-2">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="createSmartDeck()">Create</button>
+                <button class="btn btn-ghost mr-2">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createSmartDeck()">Save SmartDeck</button>
             </form>
         </div>
     </div>
@@ -184,16 +212,16 @@
 
     async function renderSmartDecks(userId) {
         const grid = document.getElementById('smart-decks-grid');
-        grid.innerHTML = '<span class="loading loading-spinner loading-lg text-primary"></span>';
+        grid.innerHTML = '<span class="loading loading-spinner loading-lg text-primary mx-auto block"></span>';
 
         try {
-            // Populate the "All Topics" dropdown in the modal for convenience
             fetchTopicsForModal();
 
             const res = await fetch(`/api/smart-decks/user/${userId}`);
             let smartDecks = [];
             if(res.ok) {
                 smartDecks = await res.json();
+                document.getElementById('stat-smartdecks-count').innerText = smartDecks.length;
             }
 
             grid.innerHTML = '';
@@ -218,29 +246,31 @@
 
     function createSmartDeckCardElement(deck, userId) {
         const card = document.createElement('div');
-        card.className = "card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-shadow";
+        card.className = "card bg-base-100 shadow-md border border-base-200 hover:shadow-lg transition-shadow";
 
-        // We will fetch due cards asynchronously for each
         const dueCountId = `due-count-${deck.id || 'all'}`;
         const btnId = `btn-study-${deck.id || 'all'}`;
 
         card.innerHTML = `
-            <div class="card-body">
-                <h3 class="card-title text-primary">${deck.name}</h3>
-                <p class="text-sm text-base-content/70 mb-4">
-                    Cards Due: <span id="${dueCountId}" class="loading loading-dots loading-xs"></span>
+            <div class="card-body p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="card-title text-base-content">${deck.name}</h3>
+                    <div class="badge badge-ghost badge-sm">${deck.isAll ? 'System' : 'Custom'}</div>
+                </div>
+
+                <p class="text-sm text-base-content/60 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+                    Due Today: <span id="${dueCountId}" class="loading loading-dots loading-xs"></span>
                 </p>
-                <div class="card-actions justify-end mt-auto">
-                    <button id="${btnId}" onclick="startStudying('${deck.id}')" class="btn btn-primary w-full" disabled>
+                <div class="card-actions mt-auto pt-2 border-t border-base-200">
+                    <button id="${btnId}" onclick="startStudying('${deck.id}')" class="btn btn-primary btn-sm w-full" disabled>
                         Loading...
                     </button>
                 </div>
             </div>
         `;
 
-        // Fetch due cards for this specific deck
         updateDueCardsCountForCard(userId, deck.id, dueCountId, btnId);
-
         return card;
     }
 
@@ -257,13 +287,13 @@
             const countSpan = document.getElementById(dueCountId);
             const studyBtn = document.getElementById(btnId);
 
-            if(countSpan) countSpan.outerHTML = `<span class="font-bold text-lg text-secondary">${dueCards.length}</span>`;
+            if(countSpan) countSpan.outerHTML = `<span class="font-bold text-md text-secondary ml-1">${dueCards.length}</span>`;
 
             if (studyBtn) {
                 if (dueCards.length === 0) {
                     studyBtn.disabled = true;
                     studyBtn.innerText = "No cards due";
-                    studyBtn.classList.replace('btn-primary', 'btn-disabled');
+                    studyBtn.classList.replace('btn-primary', 'btn-ghost');
                 } else {
                     studyBtn.disabled = false;
                     studyBtn.innerText = "Study Now";
@@ -299,8 +329,6 @@
             return;
         }
 
-        // Build filter criteria based on current backend expectations
-        // This assumes a JSONB structure like {"topics": ["Math"], "tags": ["hard"]}
         let filter_criteria = {};
         if (topic) filter_criteria.topics = [topic];
         if (tags) filter_criteria.tags = tags.split(',').map(t => t.trim()).filter(t => t);
@@ -321,7 +349,6 @@
                 document.getElementById('new-sd-name').value = '';
                 document.getElementById('new-sd-topic').value = '';
                 document.getElementById('new-sd-tags').value = '';
-                // Reload decks
                 await renderSmartDecks(userId);
             } else {
                 const data = await res.json();
@@ -334,7 +361,6 @@
     }
 
     async function loadAnalytics(userId) {
-        document.getElementById('analytics-section').classList.remove('hidden');
         try {
             const res = await fetch(`/api/analytics/${userId}`);
             if (!res.ok) return;
@@ -342,15 +368,20 @@
 
             document.getElementById('total-reviews').innerText = data.total_reviews;
 
-            // Hardest Cards List
+            // Hardest Cards List (Table format)
             const listEl = document.getElementById('hardest-cards-list');
             listEl.innerHTML = "";
             if (data.hardest_cards && data.hardest_cards.length > 0) {
                 data.hardest_cards.forEach(card => {
-                    listEl.innerHTML += `<li><span class="badge badge-error badge-sm mr-2">Rating ${card.avg_rating}</span> ${card.card_front}</li>`;
+                    listEl.innerHTML += `
+                        <tr>
+                            <td><span class="badge badge-error badge-sm">${card.avg_rating}</span></td>
+                            <td class="text-sm truncate max-w-xs">${card.card_front}</td>
+                        </tr>
+                    `;
                 });
             } else {
-                listEl.innerHTML = "<li class='text-success'>No data available yet. Keep studying!</li>";
+                listEl.innerHTML = "<tr><td colspan='2' class='text-success'>No data available yet. Keep studying!</td></tr>";
             }
 
             // Render Chart.js
@@ -362,6 +393,24 @@
             const topics = Object.keys(data.avg_duration_by_topic || {});
             const durations = Object.values(data.avg_duration_by_topic || {});
 
+            // Update hardest topic stat
+            if (topics.length > 0) {
+                let maxDur = 0;
+                let maxTop = "N/A";
+                for (let i=0; i<durations.length; i++){
+                    if (durations[i] > maxDur) {
+                        maxDur = durations[i];
+                        maxTop = topics[i];
+                    }
+                }
+                document.getElementById('stat-hardest-topic').innerText = maxTop.length > 12 ? maxTop.substring(0,10)+'...' : maxTop;
+            }
+
+            // Get current theme color variables (approximation for Chart.js)
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const textColor = isDark ? '#A6ADBB' : '#1f2937';
+
             if (topics.length > 0) {
                 durationChartInstance = new Chart(ctx, {
                     type: 'bar',
@@ -370,14 +419,20 @@
                         datasets: [{
                             label: 'Avg Duration (s)',
                             data: durations,
-                            backgroundColor: 'rgba(87, 13, 248, 0.6)', // matches daisyui primary approx
-                            borderColor: 'rgba(87, 13, 248, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Primary blue approx
+                            borderRadius: 6
                         }]
                     },
                     options: {
-                        scales: { y: { beginAtZero: true } }
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: textColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor }, beginAtZero: true }
+                        }
                     }
                 });
             } else {
@@ -397,13 +452,6 @@
             let url = `/study/${userId}`;
             if (smartDeckId) url += `?smart_deck_id=${smartDeckId}`;
             window.location.href = url;
-        }
-    }
-
-    function openStudio() {
-        const userId = localStorage.getItem('currentUserId');
-        if (userId) {
-            window.location.href = `/studio/${userId}`;
         }
     }
 
