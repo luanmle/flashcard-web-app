@@ -1,3 +1,3 @@
-from app.api.routers import users, topics, subtopics, decks, cards, reviews
+from app.api.routers import users, topics, subtopics, decks, cards, reviews, study
 
-__all__ = ["users", "topics", "subtopics", "decks", "cards", "reviews"]
+__all__ = ["users", "topics", "subtopics", "decks", "cards", "reviews", "study"]

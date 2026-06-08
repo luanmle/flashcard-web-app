@@ -119,6 +119,32 @@ class CardResponse(CardBase):
 
 
 # ==========================================
+# User Card State Schemas (SRS)
+# ==========================================
+class UserCardStateBase(BaseModel):
+    user_id: str
+    card_id: str
+    interval: int = 0
+    easiness_factor: float = 2.5
+    next_review_date: datetime
+
+class UserCardStateCreate(UserCardStateBase):
+    pass
+
+class UserCardStateUpdate(BaseModel):
+    interval: Optional[int] = None
+    easiness_factor: Optional[float] = None
+    next_review_date: Optional[datetime] = None
+
+class UserCardStateResponse(UserCardStateBase):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ==========================================
 # Review Schemas
 # ==========================================
 class ReviewBase(BaseModel):
