@@ -9,6 +9,7 @@ Bem-vindo à documentação oficial da nossa plataforma de aprendizado por Repet
 2. **Estudo Focado (Filtros)**: Permite que os usuários escolham revisar todo o conteúdo atrasado ou foquem o estudo de hoje em um "Deck" específico.
 3. **Motor SRS Sensível à Hesitação**: O coração do app. Diferente de algoritmos tradicionais, nosso cálculo de repetição avalia não apenas a nota (1 a 4) dada pelo usuário, mas o tempo (em milissegundos) que ele levou para virar a carta.
 4. **Analytics com Pandas & Chart.js**: Processamento em tempo real do histórico do usuário, exibindo em um Dashboard as matérias com maior tempo de hesitação e a lista das cartas mais difíceis (menor rating histórico).
+5. **ETL / Bulk Import**: Envie centenas de flashcards de uma só vez utilizando um arquivo CSV ou JSON. A nossa camada ETL processa os relacionamentos hierárquicos e previne duplicação automaticamente.
 
 ---
 

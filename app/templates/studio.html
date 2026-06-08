@@ -57,7 +57,7 @@
 
         <!-- Right Column: Card Creation -->
         <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-            <h2 class="text-xl font-bold mb-4 text-blue-800">2. Create Card</h2>
+            <h2 class="text-xl font-bold mb-4 text-blue-800">2. Create Card Manually</h2>
 
             <div class="mb-4 flex gap-4">
                 <label class="inline-flex items-center">
@@ -94,6 +94,25 @@
             <button onclick="createCard()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md">
                 Save Flashcard
             </button>
+        </div>
+    </div>
+
+    <!-- Bulk Import Section -->
+    <div class="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <h2 class="text-xl font-bold mb-4 text-gray-700">3. Bulk Import (CSV / JSON)</h2>
+        <p class="text-sm text-gray-600 mb-4">
+            Upload a CSV or JSON file to automatically create Topics, Subtopics, Decks, and Cards in bulk.<br>
+            <strong>Expected Columns/Keys:</strong> <code>topic, subtopic, deck, front, back, explanation (optional), tags (optional), card_type (basic/cloze)</code>
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1 border-2 border-dashed border-gray-300 p-4 rounded text-center">
+                <input type="file" id="import-file-input" accept=".csv, .json" class="mb-2 w-full text-sm">
+            </div>
+            <div class="flex flex-col gap-2 justify-center">
+                <button onclick="uploadImportFile('csv')" class="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 shadow">Import CSV</button>
+                <button onclick="uploadImportFile('json')" class="bg-purple-600 text-white px-4 py-2 rounded font-semibold hover:bg-purple-700 shadow">Import JSON</button>
+            </div>
         </div>
     </div>
 </div>
@@ -291,6 +310,43 @@
                 showStatus("Error saving card.", true);
             }
         } catch(e) { console.error(e); showStatus("Network error.", true); }
+    }
+
+    // --- BULK IMPORT ---
+    async function uploadImportFile(type) {
+        const fileInput = document.getElementById('import-file-input');
+        if (fileInput.files.length === 0) {
+            showStatus("Please select a file to import.", true);
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("user_id", USER_ID);
+
+        showStatus("Uploading and processing... This might take a few seconds.");
+
+        try {
+            const res = await fetch(`/api/import/${type}`, {
+                method: 'POST',
+                body: formData // Fetch automatically sets the multipart/form-data boundary
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                const s = data.stats;
+                showStatus(`Import success! Cards: ${s.cards_created} created, ${s.cards_skipped} skipped. Errors: ${s.errors}.`);
+                // Reload topics to show new data
+                await fetchTopics();
+            } else {
+                showStatus(data.detail || "Import failed.", true);
+            }
+        } catch(e) {
+            console.error(e);
+            showStatus("Network error during import.", true);
+        }
     }
 
     // Init
