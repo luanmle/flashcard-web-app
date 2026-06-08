@@ -18,6 +18,8 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    volumes:               # <-- ADICIONE ESTA LINHA
+      - .:/app             # <-- ADICIONE ESTA LINHA
     environment:
       # Database connection string: postgresql://user:password@host:port/dbname
       DATABASE_URL: postgresql://postgres:password123@db:5432/flashcards_db
