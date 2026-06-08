@@ -28,8 +28,17 @@ The project follows a clean and modular architectural design:
 * **Decks:** Collections of flashcards authored by a User.
 * **Cards:** Flashcards belonging to a Deck and a Subtopic, containing front/back content.
 * **Reviews:** Telemetry data tracking user performance (`rating`, `duration_ms`) on specific cards for spaced repetition analytics.
+* **UserCardStates (SRS):** A critical performance optimization table tracking the Spaced Repetition state (`interval`, `easiness_factor`, `next_review_date`) for every user-card pair.
 
 All primary keys use auto-generated string UUIDs, and all tables track a `created_at` timestamp. Strict bidirectional ORM relationships are configured using `cascade="all, delete-orphan"` to guarantee referential integrity.
+
+## 🧠 Spaced Repetition System (SRS)
+
+The core feature of this platform is the algorithmic spacing of reviews. We've implemented a highly optimized SRS architecture:
+
+1. **Hesitation-Aware Algorithm:** The backend calculates intervals based on an SM-2 variant that factors in `duration_ms`. If a user rates a card as "Easy" but takes 10 seconds to answer, the algorithm penalizes the rating, recognizing cognitive hesitation.
+2. **Performance Optimization:** Instead of calculating due cards by querying and aggregating thousands of historical `Review` logs per request, the system maintains a `UserCardState` table. Submitting a review instantly recalculates and saves the exact `next_review_date`.
+3. **Fetching Due Cards:** Fetching cards ready to be studied is a fast $O(1)$ index lookup via the `/api/study/due/` endpoint.
 
 ## 🛠️ Setup & Installation
 
@@ -84,7 +93,8 @@ Once the server is running, FastAPI automatically generates interactive API docu
 * **`/api/subtopics/`**: Manage Subtopics associated with Topics.
 * **`/api/decks/`**: Manage flashcard Decks created by Users.
 * **`/api/cards/`**: Manage individual Cards within Decks.
-* **`/api/reviews/`**: Record and read Review logs for spaced repetition algorithms.
+* **`/api/reviews/`**: Record Review logs. Submitting a review automatically updates the internal Spaced Repetition state.
+* **`/api/study/due/{user_id}`**: Fetch all cards that are due for review *today* for a specific user.
 
 ## 🤝 Contributing
 
