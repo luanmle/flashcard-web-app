@@ -21,3 +21,9 @@ async def read_study(request: Request, user_id: str):
     return templates.TemplateResponse(
         request=request, name="study.html", context={"user_id": user_id}
     )
+
+@router.get("/studio/{user_id}", response_class=HTMLResponse)
+async def read_studio(request: Request, user_id: str):
+    return templates.TemplateResponse(
+        request=request, name="studio.html", context={"user_id": user_id}
+    )
