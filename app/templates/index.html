@@ -19,11 +19,11 @@
     <div id="study-section" class="hidden">
         <h2 class="text-2xl font-semibold mb-4">Study Session</h2>
 
-        <div class="mb-4 p-4 border rounded-lg bg-gray-50 flex items-center justify-between">
+        <div class="mb-4 p-4 border rounded-lg bg-gray-50 flex flex-col gap-2">
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Deck (Optional)</label>
-                <select id="study-deck-select" class="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateDueCardsCount()">
-                    <option value="">-- All Decks --</option>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Select a SmartDeck (Filter)</label>
+                <select id="smart-deck-select" class="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateDueCardsCount()">
+                    <option value="">-- All Cards (No Filter) --</option>
                 </select>
             </div>
         </div>
@@ -118,23 +118,22 @@
 
     async function checkDueCards(userId) {
         document.getElementById('study-section').classList.remove('hidden');
-        await populateDecksFilter(userId);
+        await populateSmartDecksFilter(userId);
         await updateDueCardsCount();
     }
 
-    async function populateDecksFilter(userId) {
+    async function populateSmartDecksFilter(userId) {
         try {
-            const res = await fetch('/api/decks/');
-            const decks = await res.json();
-            const filtered = decks.filter(d => d.user_id === userId);
+            const res = await fetch(`/api/smart-decks/user/${userId}`);
+            const smartDecks = await res.json();
 
-            const select = document.getElementById('study-deck-select');
-            select.innerHTML = '<option value="">-- All Decks --</option>';
-            filtered.forEach(d => {
-                select.innerHTML += `<option value="${d.id}">${d.title}</option>`;
+            const select = document.getElementById('smart-deck-select');
+            select.innerHTML = '<option value="">-- All Cards (No Filter) --</option>';
+            smartDecks.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.name}</option>`;
             });
         } catch (e) {
-            console.error("Failed to load decks", e);
+            console.error("Failed to load SmartDecks", e);
         }
     }
 
@@ -142,10 +141,10 @@
         const userId = localStorage.getItem('currentUserId');
         if (!userId) return;
 
-        const deckId = document.getElementById('study-deck-select').value;
+        const smartDeckId = document.getElementById('smart-deck-select').value;
         let url = `/api/study/due/${userId}`;
-        if (deckId) {
-            url += `?deck_id=${deckId}`;
+        if (smartDeckId) {
+            url += `?smart_deck_id=${smartDeckId}`;
         }
 
         try {
@@ -235,10 +234,10 @@
 
     function startStudying() {
         const userId = localStorage.getItem('currentUserId');
-        const deckId = document.getElementById('study-deck-select').value;
+        const smartDeckId = document.getElementById('smart-deck-select').value;
         if (userId) {
             let url = `/study/${userId}`;
-            if (deckId) url += `?deck_id=${deckId}`;
+            if (smartDeckId) url += `?smart_deck_id=${smartDeckId}`;
             window.location.href = url;
         }
     }

@@ -42,26 +42,23 @@ def _process_rows(db: Session, user_id: str, rows) -> dict:
     stats = {
         "topics_created": 0,
         "subtopics_created": 0,
-        "decks_created": 0,
         "cards_created": 0,
-        "cards_skipped": 0,
+        "cards_updated": 0,
         "errors": 0
     }
 
     # Simple caches to avoid repeated DB lookups during the loop
     topic_cache = {}
     subtopic_cache = {}
-    deck_cache = {}
 
     for idx, row in enumerate(rows):
         try:
             topic_name = row.get("topic", "").strip()
             subtopic_name = row.get("subtopic", "").strip()
-            deck_title = row.get("deck", "").strip()
             front = row.get("front", "").strip()
             back = row.get("back", "").strip()
 
-            if not topic_name or not subtopic_name or not deck_title or not front or not back:
+            if not topic_name or not subtopic_name or not front or not back:
                 stats["errors"] += 1
                 continue
 
@@ -85,36 +82,35 @@ def _process_rows(db: Session, user_id: str, rows) -> dict:
                 subtopic_cache[subtopic_key] = db_subtopic.id
             subtopic_id = subtopic_cache[subtopic_key]
 
-            # 3. Resolve Deck
-            deck_key = f"{user_id}_{deck_title}"
-            if deck_key not in deck_cache:
-                db_decks = crud_deck.get_decks_by_user(db, user_id=user_id, limit=1000000)
-                db_deck = next((d for d in db_decks if d.title == deck_title), None)
-                if not db_deck:
-                    db_deck = crud_deck.create_deck(db, DeckCreate(title=deck_title, user_id=user_id))
-                    stats["decks_created"] += 1
-                deck_cache[deck_key] = db_deck.id
-            deck_id = deck_cache[deck_key]
+            # 3. Resolve Card (Upsert logic)
+            # Idempotency check: see if exact card exists in this subtopic
+            existing_cards = crud_card.get_cards_by_subtopic(db, subtopic_id=subtopic_id, limit=1000000)
+            existing_card = next((c for c in existing_cards if c.front_content == front), None)
 
-            # 4. Resolve Card
-            # Idempotency check: see if exact card exists in this deck
-            existing_cards = crud_card.get_cards_by_deck(db, deck_id=deck_id, limit=1000000)
-            if any(c.front_content == front for c in existing_cards):
-                stats["cards_skipped"] += 1
-                continue
+            from app.schemas.flashcards import CardUpdate
 
-            # Create Card
-            card_in = CardCreate(
-                deck_id=deck_id,
-                subtopic_id=subtopic_id,
-                front_content=front,
-                back_content=back,
-                explanation=row.get("explanation"),
-                tags=row.get("tags"),
-                card_type=row.get("card_type", "basic") or "basic"
-            )
-            crud_card.create_card(db, card_in)
-            stats["cards_created"] += 1
+            if existing_card:
+                # Update existing card
+                update_data = CardUpdate(
+                    back_content=back,
+                    explanation=row.get("explanation"),
+                    tags=row.get("tags"),
+                    card_type=row.get("card_type", "basic") or "basic"
+                )
+                crud_card.update_card(db, db_card=existing_card, card_update=update_data)
+                stats["cards_updated"] += 1
+            else:
+                # Create Card
+                card_in = CardCreate(
+                    subtopic_id=subtopic_id,
+                    front_content=front,
+                    back_content=back,
+                    explanation=row.get("explanation"),
+                    tags=row.get("tags"),
+                    card_type=row.get("card_type", "basic") or "basic"
+                )
+                crud_card.create_card(db, card_in)
+                stats["cards_created"] += 1
 
         except Exception as e:
             stats["errors"] += 1

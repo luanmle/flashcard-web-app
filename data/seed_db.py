@@ -5,12 +5,12 @@ from app.core.database import SessionLocal
 from app.crud import user as crud_user
 from app.crud import topic as crud_topic
 from app.crud import subtopic as crud_subtopic
-from app.crud import deck as crud_deck
 from app.crud import card as crud_card
+from app.crud import smart_decks as crud_smart_decks
 from app.schemas.flashcards import (
-    UserCreate, TopicCreate, SubtopicCreate,
-    DeckCreate, CardCreate
+    UserCreate, TopicCreate, SubtopicCreate, CardCreate
 )
+from app.schemas.smart_decks import SmartDeckCreate
 
 def load_seed_data(filepath: str) -> dict:
     with open(filepath, "r", encoding="utf-8") as file:
@@ -54,40 +54,39 @@ def seed_database(db: Session, data: dict):
                 else:
                     print(f"  Subtopic {subtopic_data['name']} already exists.")
 
-                for deck_data in subtopic_data.get("decks", []):
-                    # 4. Create or Get Deck
-                    db_decks = crud_deck.get_decks_by_user(db, user_id=db_user.id)
-                    db_deck = next((d for d in db_decks if d.title == deck_data["title"]), None)
-                    if not db_deck:
-                        print(f"    Creating deck: {deck_data['title']}")
-                        deck_in = DeckCreate(
-                            title=deck_data["title"],
-                            description=deck_data.get("description"),
-                            is_public=deck_data.get("is_public", False),
-                            user_id=db_user.id
+                for card_data in subtopic_data.get("cards", []):
+                    # 4. Create or Get Card
+                    # Idempotency check: look if a card with the exact front_content exists in this subtopic
+                    db_cards = crud_card.get_cards_by_subtopic(db, subtopic_id=db_subtopic.id)
+                    db_card = next((c for c in db_cards if c.front_content == card_data["front_content"]), None)
+                    if not db_card:
+                        print(f"    Creating card: {card_data['front_content'][:30]}...")
+                        card_in = CardCreate(
+                            subtopic_id=db_subtopic.id,
+                            front_content=card_data["front_content"],
+                            back_content=card_data["back_content"],
+                            tags=card_data.get("tags"),
+                            card_type=card_data.get("card_type", "basic")
                         )
-                        db_deck = crud_deck.create_deck(db, deck_in)
+                        crud_card.create_card(db, card_in)
                     else:
-                        print(f"    Deck {deck_data['title']} already exists.")
+                        print(f"    Card '{card_data['front_content'][:30]}...' already exists.")
 
-                    for card_data in deck_data.get("cards", []):
-                        # 5. Create or Get Card
-                        # Idempotency check: look if a card with the exact front_content exists in this deck
-                        db_cards = crud_card.get_cards_by_deck(db, deck_id=db_deck.id)
-                        db_card = next((c for c in db_cards if c.front_content == card_data["front_content"]), None)
-                        if not db_card:
-                            print(f"      Creating card: {card_data['front_content'][:30]}...")
-                            card_in = CardCreate(
-                                deck_id=db_deck.id,
-                                subtopic_id=db_subtopic.id,
-                                front_content=card_data["front_content"],
-                                back_content=card_data["back_content"],
-                                tags=card_data.get("tags"),
-                                card_type=card_data.get("card_type", "basic")
-                            )
-                            crud_card.create_card(db, card_in)
-                        else:
-                            print(f"      Card '{card_data['front_content'][:30]}...' already exists.")
+        # Create a default SmartDeck for the user
+        smart_decks = crud_smart_decks.get_smart_decks_by_user(db, user_id=db_user.id)
+        if not any(sd.name == "Todos os Cartões de Pandas" for sd in smart_decks):
+            print("  Creating SmartDeck: Todos os Cartões de Pandas")
+            db_topic = crud_topic.get_topic_by_name(db, name="Ciência de Dados")
+            if db_topic:
+                db_subtopics = crud_subtopic.get_subtopics_by_topic(db, topic_id=db_topic.id)
+                pandas_subtopic = next((st for st in db_subtopics if st.name == "Pandas"), None)
+                if pandas_subtopic:
+                    sd_in = SmartDeckCreate(
+                        user_id=db_user.id,
+                        name="Todos os Cartões de Pandas",
+                        filter_criteria={"subtopic_id": pandas_subtopic.id}
+                    )
+                    crud_smart_decks.create_smart_deck(db, sd_in)
 
     print("Database seeding completed.")
 

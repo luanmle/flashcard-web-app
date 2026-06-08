@@ -9,8 +9,8 @@ def get_card(db: Session, card_id: str) -> Optional[Card]:
 def get_cards(db: Session, skip: int = 0, limit: int = 100) -> List[Card]:
     return db.query(Card).offset(skip).limit(limit).all()
 
-def get_cards_by_deck(db: Session, deck_id: str, skip: int = 0, limit: int = 100) -> List[Card]:
-    return db.query(Card).filter(Card.deck_id == deck_id).offset(skip).limit(limit).all()
+def get_cards_by_subtopic(db: Session, subtopic_id: str, skip: int = 0, limit: int = 100) -> List[Card]:
+    return db.query(Card).filter(Card.subtopic_id == subtopic_id).offset(skip).limit(limit).all()
 
 def create_card(db: Session, card: CardCreate) -> Card:
     db_card = Card(**card.model_dump())

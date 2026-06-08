@@ -11,25 +11,18 @@
             {
               "name": "Pandas",
               "description": "Manipulação e análise de dados com a biblioteca Pandas do Python.",
-              "decks": [
+              "cards": [
                 {
-                  "title": "Pandas - Fundamentos",
-                  "description": "Baralho com cartões fundamentais sobre o uso da biblioteca Pandas.",
-                  "is_public": true,
-                  "cards": [
-                    {
-                      "front_content": "Como fatiar um DataFrame do Pandas pelos valores do índice utilizando localização explícita?",
-                      "back_content": "Utiliza-se o método .loc[first:last]. O índice deve estar ordenado com .sort_index() antes do fatiamento.",
-                      "tags": "pandas,data-science",
-                      "card_type": "basic"
-                    },
-                    {
-                      "front_content": "A biblioteca Pandas possui a função {{c1::.groupby()}} que é amplamente utilizada para separar os dados em grupos com base em algum critério, aplicar uma função a cada grupo independentemente e combinar os resultados.",
-                      "back_content": "Omissão: .groupby()",
-                      "tags": "pandas,cloze",
-                      "card_type": "cloze"
-                    }
-                  ]
+                  "front_content": "Como fatiar um DataFrame do Pandas pelos valores do índice utilizando localização explícita?",
+                  "back_content": "Utiliza-se o método .loc[first:last]. O índice deve estar ordenado com .sort_index() antes do fatiamento.",
+                  "tags": "pandas,data-science",
+                  "card_type": "basic"
+                },
+                {
+                  "front_content": "A biblioteca Pandas possui a função {{c1::.groupby()}} que é amplamente utilizada para separar os dados em grupos com base em algum critério, aplicar uma função a cada grupo independentemente e combinar os resultados.",
+                  "back_content": "Omissão: .groupby()",
+                  "tags": "pandas,cloze",
+                  "card_type": "cloze"
                 }
               ]
             }
@@ -42,25 +35,18 @@
             {
               "name": "MPES - Lei Complementar 95/1997",
               "description": "Lei Orgânica do Ministério Público do Estado do Espírito Santo.",
-              "decks": [
+              "cards": [
                 {
-                  "title": "MPES - Disposições Gerais",
-                  "description": "Cartões focados nas disposições gerais, funções institucionais e princípios do MP.",
-                  "is_public": true,
-                  "cards": [
-                    {
-                      "front_content": "Quais são os três princípios institucionais do Ministério Público de acordo com a CF e repetidos na LCE 95/97?",
-                      "back_content": "A unidade, a indivisibilidade e a independência funcional.",
-                      "tags": "mpes,principios",
-                      "card_type": "basic"
-                    },
-                    {
-                      "front_content": "É função institucional do MP promover o inquérito civil e a ação civil pública para a proteção do patrimônio público e social, do meio ambiente e de {{c1::outros interesses difusos e coletivos}}.",
-                      "back_content": "Omissão: outros interesses difusos e coletivos",
-                      "tags": "mpes,funcoes-institucionais",
-                      "card_type": "cloze"
-                    }
-                  ]
+                  "front_content": "Quais são os três princípios institucionais do Ministério Público de acordo com a CF e repetidos na LCE 95/97?",
+                  "back_content": "A unidade, a indivisibilidade e a independência funcional.",
+                  "tags": "mpes,principios",
+                  "card_type": "basic"
+                },
+                {
+                  "front_content": "É função institucional do MP promover o inquérito civil e a ação civil pública para a proteção do patrimônio público e social, do meio ambiente e de {{c1::outros interesses difusos e coletivos}}.",
+                  "back_content": "Omissão: outros interesses difusos e coletivos",
+                  "tags": "mpes,funcoes-institucionais",
+                  "card_type": "cloze"
                 }
               ]
             }
