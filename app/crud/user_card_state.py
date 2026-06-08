@@ -13,14 +13,19 @@ def get_state_by_user_and_card(db: Session, user_id: str, card_id: str) -> Optio
         UserCardState.card_id == card_id
     ).first()
 
-def get_due_cards_for_user(db: Session, user_id: str, limit: int = 100) -> List[UserCardStateResponse]:
+def get_due_cards_for_user(db: Session, user_id: str, limit: int = 100, deck_id: Optional[str] = None) -> List[UserCardStateResponse]:
     now = datetime.utcnow()
 
-    # 1. Get cards that have a state and are due
-    due_states = db.query(UserCardState).filter(
+    # Base query for states
+    state_query = db.query(UserCardState).join(Card).filter(
         UserCardState.user_id == user_id,
         UserCardState.next_review_date <= now
-    ).order_by(UserCardState.next_review_date.asc()).limit(limit).all()
+    )
+
+    if deck_id:
+        state_query = state_query.filter(Card.deck_id == deck_id)
+
+    due_states = state_query.order_by(UserCardState.next_review_date.asc()).limit(limit).all()
 
     # Return types must match the Pydantic schema Response
     results = [UserCardStateResponse.model_validate(s) for s in due_states]
@@ -36,6 +41,10 @@ def get_due_cards_for_user(db: Session, user_id: str, limit: int = 100) -> List[
         new_cards_query = db.query(Card).join(Deck).filter(
             Deck.user_id == user_id
         )
+
+        if deck_id:
+            new_cards_query = new_cards_query.filter(Card.deck_id == deck_id)
+
         if existing_state_card_ids:
             new_cards_query = new_cards_query.filter(~Card.id.in_(existing_state_card_ids))
 
