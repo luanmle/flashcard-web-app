@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flashcards SRS{% endblock %}</title>
+    <!-- Tailwind CSS CDN for MVP styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .flip-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Safari */
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+    <nav class="bg-blue-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-xl font-bold">Flashcards SRS</a>
+            <div>
+                <!-- Simulated logged-in user context -->
+                <span class="mr-4">User ID: <span id="nav-user-id" class="font-mono text-sm bg-blue-700 px-2 py-1 rounded"></span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 mt-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // MVP: Hardcode or read user_id from localStorage to simulate a logged-in session
+        let currentUserId = localStorage.getItem('currentUserId');
+        if (!currentUserId && window.location.pathname === '/dashboard') {
+            // For MVP, if no user is set, we will rely on the dashboard logic to set one or show a prompt.
+        } else if (currentUserId) {
+            document.getElementById('nav-user-id').innerText = currentUserId.substring(0, 8) + '...';
+        }
+    </script>
+</body>
+</html>

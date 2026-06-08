@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Study - Flashcards SRS{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col items-center mt-10">
+
+    <!-- Progress Indicator -->
+    <div class="w-full mb-6 flex justify-between items-center px-4">
+        <h2 class="text-xl font-semibold text-gray-700">Study Session</h2>
+        <span class="text-gray-500 font-medium">Due: <span id="due-count">?</span> cards</span>
+    </div>
+
+    <!-- The Flashcard -->
+    <div class="w-full h-80 perspective-1000 cursor-pointer" id="flashcard-container" onclick="flipCard()">
+        <div class="flip-card w-full h-full relative" id="flashcard">
+            <div class="flip-card-inner w-full h-full absolute">
+
+                <!-- Front -->
+                <div class="flip-card-front w-full h-full absolute bg-white border-2 border-blue-200 rounded-xl shadow-lg flex items-center justify-center p-8">
+                    <p id="card-front-content" class="text-2xl text-center text-gray-800">Loading...</p>
+                </div>
+
+                <!-- Back -->
+                <div class="flip-card-back w-full h-full absolute bg-blue-50 border-2 border-blue-300 rounded-xl shadow-lg flex flex-col items-center justify-center p-8">
+                    <p id="card-back-content" class="text-2xl text-center text-gray-800 mb-8"></p>
+                    <div class="w-full border-t border-blue-200 pt-4 hidden" id="card-tags-container">
+                        <span id="card-tags" class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions / Rating Buttons -->
+    <div class="mt-8 w-full">
+        <p id="instruction-text" class="text-center text-gray-500 mb-4">Click the card or press Space to flip.</p>
+
+        <div id="rating-buttons" class="hidden flex justify-center gap-4 w-full">
+            <button onclick="submitReview(1)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 px-4 rounded shadow transition-colors">
+                1 - Blackout
+            </button>
+            <button onclick="submitReview(2)" class="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold py-3 px-4 rounded shadow transition-colors">
+                2 - Hard
+            </button>
+            <button onclick="submitReview(3)" class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-bold py-3 px-4 rounded shadow transition-colors">
+                3 - Good
+            </button>
+            <button onclick="submitReview(4)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold py-3 px-4 rounded shadow transition-colors">
+                4 - Easy
+            </button>
+        </div>
+    </div>
+
+    <div id="session-complete" class="hidden text-center mt-12">
+        <h2 class="text-3xl font-bold text-green-600 mb-4">You're all caught up!</h2>
+        <p class="text-gray-600 mb-6">No more cards due for review right now.</p>
+        <a href="/dashboard" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Back to Dashboard</a>
+    </div>
+
+</div>
+
+<!-- Pass the user_id from Jinja to JS -->
+<script>
+    const USER_ID = "{{ user_id }}";
+
+    let dueCards = [];
+    let currentCardIndex = 0;
+    let currentCardData = null; // Holds the full Card object fetched from API
+
+    // Telemetry tracking
+    let cardShownAtTime = 0;
+    let cardFlippedAtTime = 0;
+    let isFlipped = false;
+
+    // 1. Fetch due cards on load
+    window.onload = async () => {
+        try {
+            const res = await fetch(`/api/study/due/${USER_ID}`);
+            if (res.ok) {
+                dueCards = await res.json();
+                document.getElementById('due-count').innerText = dueCards.length;
+
+                if (dueCards.length > 0) {
+                    loadCard(currentCardIndex);
+                } else {
+                    showSessionComplete();
+                }
+            } else {
+                console.error("Failed to load due cards");
+            }
+        } catch (error) {
+            console.error("API error", error);
+        }
+    };
+
+    // 2. Load the specific card details
+    async function loadCard(index) {
+        if (index >= dueCards.length) {
+            showSessionComplete();
+            return;
+        }
+
+        isFlipped = false;
+        document.getElementById('flashcard').classList.remove('flipped');
+        document.getElementById('rating-buttons').classList.add('hidden');
+        document.getElementById('instruction-text').classList.remove('hidden');
+        document.getElementById('card-tags-container').classList.add('hidden');
+
+        // Reset text
+        document.getElementById('card-front-content').innerText = "Loading...";
+        document.getElementById('card-back-content').innerText = "";
+
+        const stateObj = dueCards[index];
+
+        try {
+            const res = await fetch(`/api/cards/${stateObj.card_id}`);
+            if (res.ok) {
+                currentCardData = await res.json();
+
+                document.getElementById('card-front-content').innerText = currentCardData.front_content;
+                document.getElementById('card-back-content').innerText = currentCardData.back_content;
+
+                if (currentCardData.tags) {
+                    document.getElementById('card-tags').innerText = currentCardData.tags;
+                    document.getElementById('card-tags-container').classList.remove('hidden');
+                }
+
+                // Start the telemetry timer
+                cardShownAtTime = Date.now();
+            }
+        } catch(e) {
+            console.error("Error fetching card details", e);
+        }
+    }
+
+    // 3. Flip the card and stop timer
+    function flipCard() {
+        if (isFlipped) return; // Prevent double flip
+        if (!currentCardData) return; // Not loaded yet
+
+        isFlipped = true;
+        cardFlippedAtTime = Date.now();
+
+        document.getElementById('flashcard').classList.add('flipped');
+        document.getElementById('instruction-text').classList.add('hidden');
+        document.getElementById('rating-buttons').classList.remove('hidden');
+    }
+
+    // Allow Spacebar to flip
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            event.preventDefault(); // Prevent scrolling down
+            if (!isFlipped && currentCardData) {
+                flipCard();
+            }
+        }
+    });
+
+    // 4. Submit the review to SRS
+    async function submitReview(rating) {
+        if (!isFlipped) return;
+
+        // Calculate duration_ms (Hesitation time)
+        const duration_ms = cardFlippedAtTime - cardShownAtTime;
+
+        try {
+            const payload = {
+                user_id: USER_ID,
+                card_id: currentCardData.id,
+                rating: rating,
+                duration_ms: duration_ms
+            };
+
+            await fetch('/api/reviews/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // Move to next card
+            currentCardIndex++;
+            document.getElementById('due-count').innerText = dueCards.length - currentCardIndex;
+            loadCard(currentCardIndex);
+
+        } catch(e) {
+            console.error("Failed to submit review", e);
+        }
+    }
+
+    function showSessionComplete() {
+        document.getElementById('flashcard-container').classList.add('hidden');
+        document.getElementById('instruction-text').classList.add('hidden');
+        document.getElementById('rating-buttons').classList.add('hidden');
+        document.getElementById('session-complete').classList.remove('hidden');
+    }
+</script>
+
+<style>
+    /* Required for 3D flip effect */
+    .perspective-1000 { perspective: 1000px; }
+</style>
+{% endblock %}
