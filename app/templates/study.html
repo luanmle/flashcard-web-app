@@ -77,7 +77,16 @@
     // 1. Fetch due cards on load
     window.onload = async () => {
         try {
-            const res = await fetch(`/api/study/due/${USER_ID}`);
+            // Extract optional filter params
+            const params = new URLSearchParams(window.location.search);
+            const deckId = params.get('deck_id');
+
+            let url = `/api/study/due/${USER_ID}`;
+            if (deckId) {
+                url += `?deck_id=${deckId}`;
+            }
+
+            const res = await fetch(url);
             if (res.ok) {
                 dueCards = await res.json();
                 document.getElementById('due-count').innerText = dueCards.length;

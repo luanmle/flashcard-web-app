@@ -18,7 +18,17 @@
 
     <div id="study-section" class="hidden">
         <h2 class="text-2xl font-semibold mb-4">Study Session</h2>
-        <p class="mb-4 text-gray-600">You have <span id="due-count" class="font-bold text-blue-600 text-xl">...</span> cards due today.</p>
+
+        <div class="mb-4 p-4 border rounded-lg bg-gray-50 flex items-center justify-between">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Deck (Optional)</label>
+                <select id="study-deck-select" class="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateDueCardsCount()">
+                    <option value="">-- All Decks --</option>
+                </select>
+            </div>
+        </div>
+
+        <p class="mb-4 text-gray-600">You have <span id="due-count" class="font-bold text-blue-600 text-xl">...</span> cards due today for this selection.</p>
 
         <button onclick="startStudying()" id="start-study-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
             Start Studying Now
@@ -69,9 +79,6 @@
         }
 
         try {
-            // MVP shortcut: try to create, if fails (already exists), we would normally log in.
-            // Since we don't have auth, we just create. If 400, we assume they exist and we need their ID.
-            // For this simple MVP, we will try to create.
             let res = await fetch('/api/users/', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -84,11 +91,16 @@
             if (res.ok) {
                 userId = data.id;
             } else {
-                // If user exists, we have a small issue: our API doesn't expose a GET /by-username endpoint easily without auth or scanning.
-                // For MVP testing, let's just create a unique user each time or expect the user to know their ID.
-                // We will alert for now. In a real app, login handles this.
-                alert("Error: " + data.detail + ". For this MVP, please use a unique username/email.");
-                return;
+                // Fallback for MVP: fetch all users and find the one that matches
+                const allRes = await fetch('/api/users/');
+                const allUsers = await allRes.json();
+                const existing = allUsers.find(u => u.username === username);
+                if (existing) {
+                    userId = existing.id;
+                } else {
+                    alert("Error: " + data.detail);
+                    return;
+                }
             }
 
             localStorage.setItem('currentUserId', userId);
@@ -106,8 +118,38 @@
 
     async function checkDueCards(userId) {
         document.getElementById('study-section').classList.remove('hidden');
+        await populateDecksFilter(userId);
+        await updateDueCardsCount();
+    }
+
+    async function populateDecksFilter(userId) {
         try {
-            const res = await fetch(`/api/study/due/${userId}`);
+            const res = await fetch('/api/decks/');
+            const decks = await res.json();
+            const filtered = decks.filter(d => d.user_id === userId);
+
+            const select = document.getElementById('study-deck-select');
+            select.innerHTML = '<option value="">-- All Decks --</option>';
+            filtered.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.title}</option>`;
+            });
+        } catch (e) {
+            console.error("Failed to load decks", e);
+        }
+    }
+
+    async function updateDueCardsCount() {
+        const userId = localStorage.getItem('currentUserId');
+        if (!userId) return;
+
+        const deckId = document.getElementById('study-deck-select').value;
+        let url = `/api/study/due/${userId}`;
+        if (deckId) {
+            url += `?deck_id=${deckId}`;
+        }
+
+        try {
+            const res = await fetch(url);
             const dueCards = await res.json();
 
             const countSpan = document.getElementById('due-count');
@@ -193,8 +235,11 @@
 
     function startStudying() {
         const userId = localStorage.getItem('currentUserId');
+        const deckId = document.getElementById('study-deck-select').value;
         if (userId) {
-            window.location.href = `/study/${userId}`;
+            let url = `/study/${userId}`;
+            if (deckId) url += `?deck_id=${deckId}`;
+            window.location.href = url;
         }
     }
 
