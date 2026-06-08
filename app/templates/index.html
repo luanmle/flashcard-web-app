@@ -23,6 +23,13 @@
         <button onclick="startStudying()" id="start-study-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
             Start Studying Now
         </button>
+
+        <div class="mt-6 pt-6 border-t">
+            <h3 class="text-lg font-semibold mb-2">Create Content</h3>
+            <button onclick="openStudio()" class="w-full bg-blue-100 text-blue-700 font-bold py-3 rounded-lg hover:bg-blue-200 transition-colors">
+                Open Flashcard Studio
+            </button>
+        </div>
     </div>
 </div>
 
@@ -97,6 +104,13 @@
         const userId = localStorage.getItem('currentUserId');
         if (userId) {
             window.location.href = `/study/${userId}`;
+        }
+    }
+
+    function openStudio() {
+        const userId = localStorage.getItem('currentUserId');
+        if (userId) {
+            window.location.href = `/studio/${userId}`;
         }
     }
 
