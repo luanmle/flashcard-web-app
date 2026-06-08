@@ -1,45 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}Flashcard Studio - Flashcards SRS{% endblock %}
+{% block title %}Flashcard Studio - DashWind SRS{% endblock %}
+{% block header_title %}Flashcard Studio{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto space-y-8">
-    <div class="flex justify-between items-center border-b pb-4 border-base-300">
-        <h1 class="text-3xl font-bold">Flashcard Studio</h1>
-        <a href="/dashboard" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
-    </div>
+<div class="max-w-7xl mx-auto space-y-6">
 
     <!-- Status Message -->
     <div id="status-message" class="hidden alert mb-6 shadow-sm"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- Left Column: Hierarchy Selection -->
-        <div class="card bg-base-100 shadow-md border border-base-200">
+        <div class="card bg-base-100 shadow-md">
             <div class="card-body">
-                <h2 class="card-title text-xl mb-2">1. Select Location</h2>
+                <h2 class="card-title text-xl mb-4 border-b pb-2 border-base-200">1. Select Location</h2>
 
                 <!-- Topic -->
                 <div class="form-control mb-4">
                     <label class="label"><span class="label-text font-semibold">Topic</span></label>
-                    <select id="topic-select" class="select select-bordered w-full" onchange="onTopicChange()">
-                        <option value="">-- Select a Topic --</option>
-                    </select>
-                    <div class="mt-2 flex gap-2">
-                        <input type="text" id="new-topic-name" placeholder="New Topic Name" class="input input-bordered input-sm flex-1">
-                        <button onclick="createTopic()" class="btn btn-sm btn-secondary">Create</button>
+                    <div class="flex flex-col gap-2">
+                        <select id="topic-select" class="select select-bordered w-full" onchange="onTopicChange()">
+                            <option value="">-- Select a Topic --</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-topic-name" placeholder="New Topic Name" class="input input-bordered input-sm flex-1">
+                            <button onclick="createTopic()" class="btn btn-sm btn-outline btn-primary">Create</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Subtopic -->
                 <div class="form-control mb-4">
                     <label class="label"><span class="label-text font-semibold">Subtopic</span></label>
-                    <select id="subtopic-select" class="select select-bordered w-full disabled:bg-base-200" disabled onchange="onSubtopicChange()">
-                        <option value="">-- Select a Subtopic --</option>
-                    </select>
-                    <div class="mt-2 flex gap-2">
-                        <input type="text" id="new-subtopic-name" placeholder="New Subtopic Name" class="input input-bordered input-sm flex-1 disabled:bg-base-200" disabled>
-                        <button onclick="createSubtopic()" id="btn-create-subtopic" class="btn btn-sm btn-secondary" disabled>Create</button>
+                    <div class="flex flex-col gap-2">
+                        <select id="subtopic-select" class="select select-bordered w-full disabled:opacity-50" disabled onchange="onSubtopicChange()">
+                            <option value="">-- Select a Subtopic --</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-subtopic-name" placeholder="New Subtopic Name" class="input input-bordered input-sm flex-1 disabled:opacity-50" disabled>
+                            <button onclick="createSubtopic()" id="btn-create-subtopic" class="btn btn-sm btn-outline btn-primary" disabled>Create</button>
+                        </div>
                     </div>
                 </div>
 
@@ -47,11 +48,11 @@
         </div>
 
         <!-- Right Column: Card Creation -->
-        <div class="card bg-primary/5 shadow-md border border-primary/20">
+        <div class="card bg-base-100 shadow-md border-t-4 border-primary">
             <div class="card-body">
-                <h2 class="card-title text-xl text-primary mb-2">2. Create Card Manually</h2>
+                <h2 class="card-title text-xl mb-4 border-b pb-2 border-base-200">2. Create Card Manually</h2>
 
-                <div class="flex gap-4 mb-4">
+                <div class="flex gap-6 mb-4">
                     <label class="label cursor-pointer justify-start gap-2">
                         <input type="radio" name="card_type" value="basic" checked class="radio radio-primary" onchange="toggleClozeHelper()">
                         <span class="label-text font-medium">Basic</span>
@@ -86,27 +87,29 @@
                     <input type="text" id="card-tags" class="input input-bordered w-full" placeholder="e.g. math, algebra, hard">
                 </div>
 
-                <button onclick="createCard()" class="btn btn-primary w-full shadow-md">
-                    Save Flashcard
-                </button>
+                <div class="card-actions justify-end mt-2">
+                    <button onclick="createCard()" class="btn btn-primary w-full md:w-auto shadow-md">
+                        Save Flashcard
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Bulk Import Section -->
-    <div class="card bg-base-100 shadow-md border border-base-200 mt-8">
+    <div class="card bg-base-100 shadow-md mt-6">
         <div class="card-body">
-            <h2 class="card-title text-xl mb-2">3. Bulk Import (CSV / JSON)</h2>
+            <h2 class="card-title text-xl mb-4 border-b pb-2 border-base-200">3. Bulk Import (CSV / JSON)</h2>
             <p class="text-sm text-base-content/70 mb-4">
                 Upload a CSV or JSON file to automatically create Topics, Subtopics, and Cards in bulk.<br>
-                <strong>Expected Columns/Keys:</strong> <code>topic, subtopic, front, back, explanation (optional), tags (optional), card_type (basic/cloze)</code>
+                <span class="badge badge-neutral mt-2">Expected Columns/Keys:</span> <code>topic, subtopic, front, back, explanation (optional), tags (optional), card_type (basic/cloze)</code>
             </p>
 
-            <div class="flex flex-col md:flex-row gap-6 items-center">
-                <div class="flex-1 w-full border-2 border-dashed border-base-300 p-6 rounded-lg text-center bg-base-200/50">
-                    <input type="file" id="import-file-input" accept=".csv, .json" class="file-input file-input-bordered file-input-primary w-full max-w-xs" />
+            <div class="flex flex-col md:flex-row gap-6 items-center bg-base-200 p-6 rounded-lg border border-base-300 border-dashed">
+                <div class="flex-1 w-full text-center">
+                    <input type="file" id="import-file-input" accept=".csv, .json" class="file-input file-input-bordered file-input-primary w-full max-w-sm" />
                 </div>
-                <div class="flex flex-col gap-3 justify-center w-full md:w-auto">
+                <div class="flex flex-col md:flex-row gap-3 justify-center w-full md:w-auto">
                     <button onclick="uploadImportFile('csv')" class="btn btn-success text-white shadow">Import CSV</button>
                     <button onclick="uploadImportFile('json')" class="btn btn-accent text-white shadow">Import JSON</button>
                 </div>
@@ -180,7 +183,6 @@
         try {
             const res = await fetch('/api/subtopics/');
             const subtopics = await res.json();
-            // Filter by topic manually since API doesn't have ?topic_id= query param exposed yet
             const filtered = subtopics.filter(s => s.topic_id === topicId);
             filtered.forEach(s => {
                 subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
@@ -283,7 +285,7 @@
         try {
             const res = await fetch(`/api/import/${type}`, {
                 method: 'POST',
-                body: formData // Fetch automatically sets the multipart/form-data boundary
+                body: formData
             });
 
             const data = await res.json();
@@ -291,7 +293,6 @@
             if (res.ok) {
                 const s = data.stats;
                 showStatus(`Import success! Cards: ${s.cards_created} created, ${s.cards_skipped} skipped. Errors: ${s.errors}.`);
-                // Reload topics to show new data
                 await fetchTopics();
             } else {
                 showStatus(data.detail || "Import failed.", true);
