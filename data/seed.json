@@ -1,12 +1,72 @@
-[
-  {
-    "front_content": "Como fatiar um DataFrame do Pandas pelos valores do índice utilizando localização explícita?",
-    "back_content": "Utiliza-se o método .loc[first:last]. O índice deve estar ordenado com .sort_index() antes do fatiamento.",
-    "tags": "pandas,data-science"
-  },
-  {
-    "front_content": "Qual o prazo do aviso prévio proporcional ao tempo de serviço de acordo com a CLT?",
-    "back_content": "O aviso prévio é de no mínimo 30 dias, acrescidos de 3 dias por ano de serviço prestado na mesma empresa, até o limite de 60 dias, perfazendo um total máximo de 90 dias.",
-    "tags": "direito-do-trabalho,clt"
-  }
-]
+{
+  "users": [
+    {
+      "username": "seed_user",
+      "email": "seed_user@example.com",
+      "topics": [
+        {
+          "name": "Ciência de Dados",
+          "description": "Estudos sobre Data Science, machine learning e engenharia de dados.",
+          "subtopics": [
+            {
+              "name": "Pandas",
+              "description": "Manipulação e análise de dados com a biblioteca Pandas do Python.",
+              "decks": [
+                {
+                  "title": "Pandas - Fundamentos",
+                  "description": "Baralho com cartões fundamentais sobre o uso da biblioteca Pandas.",
+                  "is_public": true,
+                  "cards": [
+                    {
+                      "front_content": "Como fatiar um DataFrame do Pandas pelos valores do índice utilizando localização explícita?",
+                      "back_content": "Utiliza-se o método .loc[first:last]. O índice deve estar ordenado com .sort_index() antes do fatiamento.",
+                      "tags": "pandas,data-science",
+                      "card_type": "basic"
+                    },
+                    {
+                      "front_content": "A biblioteca Pandas possui a função {{c1::.groupby()}} que é amplamente utilizada para separar os dados em grupos com base em algum critério, aplicar uma função a cada grupo independentemente e combinar os resultados.",
+                      "back_content": "Omissão: .groupby()",
+                      "tags": "pandas,cloze",
+                      "card_type": "cloze"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Legislação Estadual",
+          "description": "Estudos sobre as constituições e leis complementares estaduais.",
+          "subtopics": [
+            {
+              "name": "MPES - Lei Complementar 95/1997",
+              "description": "Lei Orgânica do Ministério Público do Estado do Espírito Santo.",
+              "decks": [
+                {
+                  "title": "MPES - Disposições Gerais",
+                  "description": "Cartões focados nas disposições gerais, funções institucionais e princípios do MP.",
+                  "is_public": true,
+                  "cards": [
+                    {
+                      "front_content": "Quais são os três princípios institucionais do Ministério Público de acordo com a CF e repetidos na LCE 95/97?",
+                      "back_content": "A unidade, a indivisibilidade e a independência funcional.",
+                      "tags": "mpes,principios",
+                      "card_type": "basic"
+                    },
+                    {
+                      "front_content": "É função institucional do MP promover o inquérito civil e a ação civil pública para a proteção do patrimônio público e social, do meio ambiente e de {{c1::outros interesses difusos e coletivos}}.",
+                      "back_content": "Omissão: outros interesses difusos e coletivos",
+                      "tags": "mpes,funcoes-institucionais",
+                      "card_type": "cloze"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
