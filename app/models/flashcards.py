@@ -62,6 +62,7 @@ class Card(Base):
     subtopic_id = Column(String, ForeignKey("subtopics.id"), nullable=False)
     front_content = Column(Text, nullable=False)
     back_content = Column(Text, nullable=False)
+    explanation = Column(Text, nullable=True)
     tags = Column(String, nullable=True) # Comma-separated
     card_type = Column(String, default="basic")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -70,6 +71,8 @@ class Card(Base):
     subtopic = relationship("Subtopic", back_populates="cards")
     reviews = relationship("Review", back_populates="card", cascade="all, delete-orphan")
     user_states = relationship("UserCardState", back_populates="card", cascade="all, delete-orphan")
+    annotations = relationship("UserCardAnnotation", back_populates="card", cascade="all, delete-orphan")
+    suggestions = relationship("CardSuggestion", back_populates="card", cascade="all, delete-orphan")
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -101,3 +104,33 @@ class UserCardState(Base):
 
     user = relationship("User", back_populates="card_states")
     card = relationship("Card", back_populates="user_states")
+
+class UserCardAnnotation(Base):
+    __tablename__ = "user_card_annotations"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    card_id = Column(String, ForeignKey("cards.id"), nullable=False)
+    text = Column(Text, nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User")
+    card = relationship("Card", back_populates="annotations")
+
+class CardSuggestion(Base):
+    __tablename__ = "card_suggestions"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    card_id = Column(String, ForeignKey("cards.id"), nullable=False)
+    comment = Column(Text, nullable=False)
+    suggested_front = Column(Text, nullable=True)
+    suggested_back = Column(Text, nullable=True)
+    status = Column(String, default="pending")
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+    card = relationship("Card", back_populates="suggestions")

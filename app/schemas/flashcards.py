@@ -99,6 +99,7 @@ class CardBase(BaseModel):
     subtopic_id: str
     front_content: str
     back_content: str
+    explanation: Optional[str] = None
     tags: Optional[str] = None
     card_type: str = "basic"
 
@@ -108,10 +109,60 @@ class CardCreate(CardBase):
 class CardUpdate(BaseModel):
     front_content: Optional[str] = None
     back_content: Optional[str] = None
+    explanation: Optional[str] = None
     tags: Optional[str] = None
     card_type: Optional[str] = None
 
 class CardResponse(CardBase):
+    id: str
+    created_at: datetime
+
+    # Extended properties for breadcrumbs when queried directly
+    deck_title: Optional[str] = None
+    subtopic_name: Optional[str] = None
+    topic_name: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+# ==========================================
+# User Card Annotation Schemas
+# ==========================================
+class UserCardAnnotationBase(BaseModel):
+    user_id: str
+    card_id: str
+    text: str
+
+class UserCardAnnotationCreate(UserCardAnnotationBase):
+    pass
+
+class UserCardAnnotationUpdate(BaseModel):
+    text: str
+
+class UserCardAnnotationResponse(UserCardAnnotationBase):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+# ==========================================
+# Card Suggestion Schemas
+# ==========================================
+class CardSuggestionBase(BaseModel):
+    user_id: str
+    card_id: str
+    comment: str
+    suggested_front: Optional[str] = None
+    suggested_back: Optional[str] = None
+    status: str = "pending"
+
+class CardSuggestionCreate(CardSuggestionBase):
+    pass
+
+class CardSuggestionUpdate(BaseModel):
+    status: str
+
+class CardSuggestionResponse(CardSuggestionBase):
     id: str
     created_at: datetime
 

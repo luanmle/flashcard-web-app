@@ -21,7 +21,18 @@ def read_card(card_id: str, db: Session = Depends(get_db)):
     db_card = crud_card.get_card(db, card_id=card_id)
     if db_card is None:
         raise HTTPException(status_code=404, detail="Card not found")
-    return db_card
+
+    # We populate the extended properties for breadcrumbs dynamically
+    response_data = CardResponse.model_validate(db_card)
+
+    if db_card.deck:
+        response_data.deck_title = db_card.deck.title
+    if db_card.subtopic:
+        response_data.subtopic_name = db_card.subtopic.name
+        if db_card.subtopic.topic:
+            response_data.topic_name = db_card.subtopic.topic.name
+
+    return response_data
 
 @router.put("/{card_id}", response_model=CardResponse)
 def update_card(card_id: str, card_in: CardUpdate, db: Session = Depends(get_db)):

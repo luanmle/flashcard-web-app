@@ -11,24 +11,45 @@
         <span class="text-gray-500 font-medium">Due: <span id="due-count">?</span> cards</span>
     </div>
 
+    <!-- Breadcrumbs -->
+    <div class="w-full mb-2 px-4 flex text-sm text-gray-500 hidden" id="breadcrumbs-container">
+        <span id="bc-topic"></span>&nbsp;>&nbsp;<span id="bc-subtopic"></span>&nbsp;>&nbsp;<span id="bc-deck" class="font-semibold text-gray-700"></span>
+    </div>
+
     <!-- The Flashcard -->
-    <div class="w-full h-80 perspective-1000 cursor-pointer" id="flashcard-container" onclick="flipCard()">
-        <div class="flip-card w-full h-full relative" id="flashcard">
-            <div class="flip-card-inner w-full h-full absolute">
+    <div class="w-full min-h-80 cursor-pointer mb-6" id="flashcard-container" onclick="flipCard()">
 
-                <!-- Front -->
-                <div class="flip-card-front w-full h-full absolute bg-white border-2 border-blue-200 rounded-xl shadow-lg flex items-center justify-center p-8">
-                    <p id="card-front-content" class="text-2xl text-center text-gray-800">Loading...</p>
-                </div>
+        <!-- Front -->
+        <div id="flashcard-front" class="w-full min-h-80 bg-white border-2 border-blue-200 rounded-xl shadow-lg flex items-center justify-center p-8 transition-opacity">
+            <p id="card-front-content" class="text-2xl text-center text-gray-800">Loading...</p>
+        </div>
 
-                <!-- Back -->
-                <div class="flip-card-back w-full h-full absolute bg-blue-50 border-2 border-blue-300 rounded-xl shadow-lg flex flex-col items-center justify-center p-8">
-                    <p id="card-back-content" class="text-2xl text-center text-gray-800 mb-8"></p>
-                    <div class="w-full border-t border-blue-200 pt-4 hidden" id="card-tags-container">
-                        <span id="card-tags" class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded"></span>
-                    </div>
-                </div>
+        <!-- Back -->
+        <div id="flashcard-back" class="w-full min-h-80 bg-blue-50 border-2 border-blue-300 rounded-xl shadow-lg flex flex-col items-center justify-center p-8 hidden">
+            <p id="card-back-content" class="text-2xl text-center text-gray-800 mb-8"></p>
+            <div class="w-full border-t border-blue-200 pt-4 hidden" id="card-tags-container">
+                <span id="card-tags" class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded"></span>
+            </div>
+        </div>
+    </div>
 
+    <!-- Explanation & Annotation Footer -->
+    <div id="footer-section" class="w-full hidden">
+        <!-- Explanation -->
+        <div id="explanation-container" class="w-full bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4 hidden">
+            <h3 class="text-sm font-bold text-indigo-800 mb-2">💡 Explicação do Gabarito</h3>
+            <p id="card-explanation" class="text-indigo-900 text-sm whitespace-pre-line"></p>
+        </div>
+
+        <!-- Annotation & Suggestion -->
+        <div class="w-full flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <label class="text-sm font-semibold text-gray-600">Minhas Anotações</label>
+                <button onclick="openSuggestionModal()" class="text-sm text-red-500 hover:text-red-700 font-medium">Sugerir Alteração / Erro</button>
+            </div>
+            <textarea id="annotation-input" rows="3" class="w-full p-3 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Digite suas anotações para este cartão..."></textarea>
+            <div class="flex justify-end">
+                <button id="btn-save-annotation" onclick="saveAnnotation()" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded font-semibold transition-colors">Salvar Anotação</button>
             </div>
         </div>
     </div>
@@ -59,6 +80,18 @@
         <a href="/dashboard" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Back to Dashboard</a>
     </div>
 
+</div>
+
+<!-- Suggestion Modal -->
+<div id="suggestion-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Sugerir Alteração / Reportar Erro</h2>
+        <textarea id="suggestion-comment" rows="3" class="w-full p-2 border rounded focus:ring-red-500 focus:border-red-500 mb-4" placeholder="Descreva o erro ou sugestão de melhoria..."></textarea>
+        <div class="flex justify-end gap-2">
+            <button onclick="closeSuggestionModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded">Cancelar</button>
+            <button onclick="submitSuggestion()" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded font-semibold">Enviar Report</button>
+        </div>
+    </div>
 </div>
 
 <!-- Pass the user_id from Jinja to JS -->
@@ -112,14 +145,23 @@
         }
 
         isFlipped = false;
-        document.getElementById('flashcard').classList.remove('flipped');
+
+        // Reset Views
+        document.getElementById('flashcard-front').classList.remove('hidden');
+        document.getElementById('flashcard-back').classList.add('hidden');
+        document.getElementById('footer-section').classList.add('hidden');
+        document.getElementById('explanation-container').classList.add('hidden');
+        document.getElementById('breadcrumbs-container').classList.add('hidden');
         document.getElementById('rating-buttons').classList.add('hidden');
         document.getElementById('instruction-text').classList.remove('hidden');
         document.getElementById('card-tags-container').classList.add('hidden');
 
+        // Reset inputs
+        document.getElementById('annotation-input').value = "";
+
         // Reset text
-        document.getElementById('card-front-content').innerText = "Loading...";
-        document.getElementById('card-back-content').innerText = "";
+        document.getElementById('card-front-content').innerHTML = "Loading...";
+        document.getElementById('card-back-content').innerHTML = "";
 
         const stateObj = dueCards[index];
 
@@ -138,28 +180,117 @@
                     if (clozeMatch) {
                         const hiddenWord = clozeMatch[1];
                         frontText = frontText.replace(/\{\{c1::.*?\}\}/g, '[...]');
+
+                        // We use innerHTML to render styling
+                        const highlightHtml = `<span class="bg-yellow-200 text-yellow-900 font-bold px-2 py-1 rounded">${hiddenWord}</span>`;
+                        const originalFrontWithHighlight = currentCardData.front_content.replace(/\{\{c1::.*?\}\}/g, highlightHtml);
+
                         if (!backText) {
-                            backText = hiddenWord;
+                            backText = originalFrontWithHighlight;
                         } else {
-                            // If backText has something, ensure the cloze word is bolded or visible
-                            backText = backText + `\n\n(Cloze: ${hiddenWord})`;
+                            backText = originalFrontWithHighlight + `<br><br><strong>Note:</strong> ${backText}`;
                         }
                     }
                 }
 
-                document.getElementById('card-front-content').innerText = frontText;
-                document.getElementById('card-back-content').innerText = backText;
+                document.getElementById('card-front-content').innerHTML = frontText;
+                document.getElementById('card-back-content').innerHTML = backText;
+
+                // Breadcrumbs
+                if(currentCardData.topic_name) {
+                    document.getElementById('bc-topic').innerText = currentCardData.topic_name;
+                    document.getElementById('bc-subtopic').innerText = currentCardData.subtopic_name;
+                    document.getElementById('bc-deck').innerText = currentCardData.deck_title;
+                    document.getElementById('breadcrumbs-container').classList.remove('hidden');
+                }
+
+                // Explanation
+                if(currentCardData.explanation) {
+                    document.getElementById('card-explanation').innerText = currentCardData.explanation;
+                    document.getElementById('explanation-container').classList.remove('hidden');
+                }
 
                 if (currentCardData.tags) {
                     document.getElementById('card-tags').innerText = currentCardData.tags;
                     document.getElementById('card-tags-container').classList.remove('hidden');
                 }
 
+                // Fetch Annotation
+                fetchAnnotation(currentCardData.id);
+
                 // Start the telemetry timer
                 cardShownAtTime = Date.now();
             }
         } catch(e) {
             console.error("Error fetching card details", e);
+        }
+    }
+
+    // Fetch Annotation
+    async function fetchAnnotation(cardId) {
+        try {
+            const res = await fetch(`/api/annotations/${USER_ID}/${cardId}`);
+            if(res.ok) {
+                const data = await res.json();
+                document.getElementById('annotation-input').value = data.text;
+                document.getElementById('btn-save-annotation').innerText = "Atualizar Anotação";
+            } else {
+                document.getElementById('btn-save-annotation').innerText = "Salvar Anotação";
+            }
+        } catch(e) {}
+    }
+
+    // Save Annotation
+    async function saveAnnotation() {
+        const text = document.getElementById('annotation-input').value.trim();
+        const btn = document.getElementById('btn-save-annotation');
+        if(!text || !currentCardData) return;
+
+        btn.innerText = "Salvando...";
+        try {
+            await fetch('/api/annotations/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: USER_ID,
+                    card_id: currentCardData.id,
+                    text: text
+                })
+            });
+            btn.innerText = "Salvo!";
+            setTimeout(() => { btn.innerText = "Atualizar Anotação"; }, 2000);
+        } catch(e) {
+            btn.innerText = "Erro!";
+        }
+    }
+
+    // Modal Logic
+    function openSuggestionModal() {
+        document.getElementById('suggestion-modal').classList.remove('hidden');
+    }
+
+    function closeSuggestionModal() {
+        document.getElementById('suggestion-modal').classList.add('hidden');
+        document.getElementById('suggestion-comment').value = '';
+    }
+
+    async function submitSuggestion() {
+        const comment = document.getElementById('suggestion-comment').value.trim();
+        if(!comment || !currentCardData) return;
+        try {
+            await fetch('/api/suggestions/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: USER_ID,
+                    card_id: currentCardData.id,
+                    comment: comment
+                })
+            });
+            closeSuggestionModal();
+            alert("Report/Sugestão enviada com sucesso! Obrigado.");
+        } catch(e) {
+            alert("Erro ao enviar sugestão.");
         }
     }
 
@@ -171,9 +302,12 @@
         isFlipped = true;
         cardFlippedAtTime = Date.now();
 
-        document.getElementById('flashcard').classList.add('flipped');
+        document.getElementById('flashcard-front').classList.add('hidden');
+        document.getElementById('flashcard-back').classList.remove('hidden');
+
         document.getElementById('instruction-text').classList.add('hidden');
         document.getElementById('rating-buttons').classList.remove('hidden');
+        document.getElementById('footer-section').classList.remove('hidden');
     }
 
     // Allow Spacebar to flip
