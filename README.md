@@ -89,15 +89,29 @@ Quando o usuário submete um review na tela de **Study**, o **Motor SRS** calcul
 
 ---
 
-## 🚀 Como Iniciar (Setup de Desenvolvimento)
+## 🚀 Como Iniciar (Setup Local ou Docker)
 
-### 1. Requisitos
+### Opção A: Setup com Docker (Recomendado para Produção / Deploy Rápido)
+
+A aplicação está totalmente "Dockerizada", incluindo o servidor FastAPI e o banco de dados PostgreSQL.
+
+1. **Requisitos:** Tenha o [Docker](https://docs.docker.com/get-docker/) e o Docker Compose instalados.
+2. **Execute o ambiente:**
+   ```bash
+   docker compose up --build -d
+   ```
+3. O script de inicialização do container rodará as migrações do Alembic automaticamente. A aplicação estará rodando em `http://localhost:8000`.
+
+---
+
+### Opção B: Setup Local Manual (Desenvolvimento)
+
+#### 1. Requisitos
 - **Python 3.12+**
 - Instância do **PostgreSQL** rodando (ou local, ou Docker).
   - *Dica para testes rápidos:* O sistema aceita rodar em SQLite para validações mudando a string de conexão.
 
-### 2. Instalação
-
+#### 2. Instalação
 ```bash
 # Clone o repositório
 git clone <url-do-repositorio>
@@ -111,8 +125,7 @@ source venv/bin/activate  # (Windows: venv\Scripts\activate)
 pip install -r requirements.txt
 ```
 
-### 3. Configuração do Banco de Dados
-
+#### 3. Configuração do Banco de Dados
 Aponte para o seu PostgreSQL exportando a variável de ambiente:
 ```bash
 export DATABASE_URL="postgresql://user:password@localhost/flashcards"

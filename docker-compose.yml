@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: flashcards_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: flashcards_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: flashcards_web
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Database connection string: postgresql://user:password@host:port/dbname
+      DATABASE_URL: postgresql://postgres:password123@db:5432/flashcards_db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
