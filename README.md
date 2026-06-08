@@ -1,73 +1,95 @@
-# 🧠 Flashcard Analytics Web App
+# Flashcards API Platform
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg)
-![Pandas](https://img.shields.io/badge/Pandas-2.0+-150458.svg)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791.svg)
-![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange.svg)
+A robust backend API for a flashcards platform focused on data analysis and spaced repetition, built with FastAPI, SQLAlchemy, Alembic, and PostgreSQL.
 
-Uma plataforma web de flashcards focada em repetição espaçada (*Spaced Repetition*) e recuperação ativa (*Active Recall*), desenhada com a robustez e capilaridade de filtros dos grandes bancos de questões para concursos. 
+## 🚀 Technologies
 
-Mais do que um aplicativo de estudos, este projeto é um laboratório de **Ciência e Análise de Dados**, projetado para coletar logs detalhados de retenção de conhecimento e tempo de resposta para modelagem estatística.
+* **Framework:** [FastAPI](https://fastapi.tiangolo.com/)
+* **Database:** PostgreSQL
+* **ORM:** [SQLAlchemy](https://www.sqlalchemy.org/)
+* **Migrations:** [Alembic](https://alembic.sqlalchemy.org/)
+* **Validation:** [Pydantic](https://docs.pydantic.dev/)
 
----
+## 🏗️ Architecture
 
-## 🎯 Visão Geral e O Problema
+The project follows a clean and modular architectural design:
 
-Estudantes que enfrentam editais densos (como legislações complexas e disciplinas técnicas) sofrem com a "curva de esquecimento". Ferramentas tradicionais de flashcards frequentemente carecem de uma estruturação hierárquica eficiente que permita filtrar os estudos por nichos específicos, além de não fornecerem métricas granulares sobre o comportamento de aprendizado.
+* `app/core/`: Contains core configurations (like the database connection).
+* `app/models/`: SQLAlchemy ORM models representing the database schema.
+* `app/schemas/`: Pydantic models for request/response validation.
+* `app/crud/`: Reusable CRUD (Create, Read, Update, Delete) operations.
+* `app/api/routers/`: FastAPI route definitions, handling HTTP logic and connecting with the CRUD layer.
+* `app/main.py`: The entrypoint of the FastAPI application.
+* `alembic/`: Database migration scripts and environment configurations.
 
-**A Solução:** Uma API RESTful desacoplada que não apenas agenda as revisões de forma inteligente (via algoritmo de repetição espaçada), mas que categoriza os estudos e processa telemetria avançada em um banco de dados relacional.
+### Key Entities
+* **Users:** Unique profiles defined by an email and username.
+* **Topics & Subtopics:** Hierarchical categorization for study subjects (e.g., 'Data Science' -> 'Pandas').
+* **Decks:** Collections of flashcards authored by a User.
+* **Cards:** Flashcards belonging to a Deck and a Subtopic, containing front/back content.
+* **Reviews:** Telemetry data tracking user performance (`rating`, `duration_ms`) on specific cards for spaced repetition analytics.
 
----
+All primary keys use auto-generated string UUIDs, and all tables track a `created_at` timestamp. Strict bidirectional ORM relationships are configured using `cascade="all, delete-orphan"` to guarantee referential integrity.
 
-## ⚙️ Escopo e Funcionalidades
+## 🛠️ Setup & Installation
 
-### 🚀 MVP (Minimum Viable Product)
-- **Motor de Repetição Espaçada:** Algoritmo de agendamento (inspirado no SM-2/Anki) processado no backend para otimização de retenção a longo prazo.
-- **Sistema Avançado de Filtros:** Criação de baralhos dinâmicos e sessões de estudo segmentadas. A estrutura hierárquica suportada inclui:
-  | Estrutura de Filtros (Tópicos e Subtópicos) |
-  | :--- |
-  | Tópico: Ciência de Dados |
-  | Subtópico: Pandas |
-  | Subtópico: Machine Learning |
-  | Tópico: Legislação |
-  | Subtópico: Lei Orgânica |
-  | Subtópico: Código de Ética |
-- **Modelos de Cartão Múltiplos:** Suporte nativo a cartões no formato *Básico* (Frente/Verso) e *Cloze Deletion* (Omissão de palavras, ideal para "lei seca").
-- **Estatísticas Analíticas (Dashboard):** Processamento de dados via Pandas para exibir taxa de retenção, tempo médio de resposta e volume de estudos filtráveis por dia, mês, ano e matéria.
+### 1. Requirements
+Ensure you have Python 3.12+ and PostgreSQL installed.
 
-### 🔮 Implementações Futuras (Arquitetura Preparada)
-O banco de dados foi modelado prevendo escalabilidade horizontal para funções de comunidade e *Machine Learning*:
-- **Módulo Social:** Comentários em cartões (para resolução colaborativa) e sistema de *likes* em comentários.
-- **Micro-Análises de Cartão:** Estatísticas do histórico de revisão individual de cada flashcard (taxa de acerto global vs. individual).
-- **Modelagem Preditiva:** Utilização do histórico de revisões (banco de logs) para treinar modelos preditivos capazes de antecipar o esquecimento com base no tempo de hesitação (*duration_ms*).
+### 2. Environment Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd <project-directory>
 
----
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
-## 🏗️ Arquitetura e Engenharia de Dados
+# Install dependencies
+pip install -r requirements.txt
+```
 
-O projeto utiliza o ecossistema do **GitHub Student Developer Pack** (Codespaces para desenvolvimento cloud-native) e é impulsionado por uma stack moderna em Python. A aplicação segue o padrão de repositório, mantendo o frontend totalmente desacoplado para futuras implementações em React/Next.js.
+### 3. Database Configuration
+By default, the application connects to a local PostgreSQL database at `postgresql://postgres:postgres@localhost/flashcards`.
+You can override this by exporting the `DATABASE_URL` environment variable:
+```bash
+export DATABASE_URL="postgresql://user:password@localhost/dbname"
+```
 
-### Diagrama Entidade-Relacionamento (Core de Dados)
+### 4. Running Migrations
+To initialize the database schema, apply the Alembic migrations:
+```bash
+alembic upgrade head
+```
 
-```mermaid
-erDiagram
-    USERS ||--o{ DECKS : "cria"
-    USERS ||--o{ REVIEWS : "gera"
-    TOPICS ||--o{ SUBTOPICS : "possui"
-    SUBTOPICS ||--o{ CARDS : "categoriza"
-    DECKS ||--|{ CARDS : "agrupa"
-    CARDS ||--o{ REVIEWS : "histórico de"
-    
-    CARDS {
-        string type "basic, cloze"
-        string front_content
-        string back_content
-    }
-    
-    REVIEWS {
-        int rating "1 a 4 (Errei a Fácil)"
-        int duration_ms "Telemetria de hesitação"
-        datetime reviewed_at
-    }
+### 5. Running the Application
+Start the FastAPI server using Uvicorn:
+```bash
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`.
+
+## 📚 API Documentation
+
+Once the server is running, FastAPI automatically generates interactive API documentation. You can explore the available endpoints and test them directly from your browser:
+
+* **Swagger UI:** `http://localhost:8000/docs`
+* **ReDoc:** `http://localhost:8000/redoc`
+
+### Primary Endpoints
+* **`/api/users/`**: Create, read, update, and delete Users.
+* **`/api/topics/`**: Manage study Topics.
+* **`/api/subtopics/`**: Manage Subtopics associated with Topics.
+* **`/api/decks/`**: Manage flashcard Decks created by Users.
+* **`/api/cards/`**: Manage individual Cards within Decks.
+* **`/api/reviews/`**: Record and read Review logs for spaced repetition algorithms.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
