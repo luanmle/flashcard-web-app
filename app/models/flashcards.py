@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, Boolean, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Text, Boolean, Integer, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -17,6 +17,7 @@ class User(Base):
 
     decks = relationship("Deck", back_populates="author", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
+    card_states = relationship("UserCardState", back_populates="user", cascade="all, delete-orphan")
 
 class Topic(Base):
     __tablename__ = "topics"
@@ -68,6 +69,7 @@ class Card(Base):
     deck = relationship("Deck", back_populates="cards")
     subtopic = relationship("Subtopic", back_populates="cards")
     reviews = relationship("Review", back_populates="card", cascade="all, delete-orphan")
+    user_states = relationship("UserCardState", back_populates="card", cascade="all, delete-orphan")
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -82,3 +84,20 @@ class Review(Base):
 
     user = relationship("User", back_populates="reviews")
     card = relationship("Card", back_populates="reviews")
+
+class UserCardState(Base):
+    __tablename__ = "user_card_states"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    card_id = Column(String, ForeignKey("cards.id"), nullable=False)
+
+    interval = Column(Integer, default=0) # Interval in days
+    easiness_factor = Column(Float, default=2.5) # SuperMemo-2 EF
+    next_review_date = Column(DateTime, default=datetime.utcnow)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="card_states")
+    card = relationship("Card", back_populates="user_states")
