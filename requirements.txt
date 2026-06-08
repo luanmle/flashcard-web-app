@@ -6,3 +6,4 @@ pandas
 alembic
 pydantic[email]
 jinja2
+python-multipart
