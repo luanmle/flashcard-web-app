@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routers import users, topics, subtopics, decks, cards, reviews, study
+from app.api.routers import users, topics, subtopics, decks, cards, reviews, study, frontend
 
 app = FastAPI(
     title="Flashcards API",
@@ -15,6 +15,5 @@ app.include_router(cards.router, prefix="/api/cards", tags=["cards"])
 app.include_router(reviews.router, prefix="/api/reviews", tags=["reviews"])
 app.include_router(study.router, prefix="/api/study", tags=["study"])
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Flashcards API"}
+# Include the frontend router without an API prefix
+app.include_router(frontend.router, tags=["frontend"])

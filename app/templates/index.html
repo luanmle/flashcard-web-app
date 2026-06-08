@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Flashcards SRS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
+
+    <div id="setup-section" class="mb-8 p-4 border border-blue-200 bg-blue-50 rounded-lg">
+        <h2 class="text-xl font-semibold mb-2">1. Select or Create User</h2>
+        <div class="flex gap-2">
+            <input type="text" id="username-input" placeholder="Enter username" class="border p-2 rounded flex-1">
+            <input type="email" id="email-input" placeholder="Enter email" class="border p-2 rounded flex-1">
+            <button onclick="loginOrCreateUser()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Set User</button>
+        </div>
+        <p id="user-status" class="text-sm mt-2 text-green-600 hidden">User set successfully!</p>
+    </div>
+
+    <div id="study-section" class="hidden">
+        <h2 class="text-2xl font-semibold mb-4">Study Session</h2>
+        <p class="mb-4 text-gray-600">You have <span id="due-count" class="font-bold text-blue-600 text-xl">...</span> cards due today.</p>
+
+        <button onclick="startStudying()" id="start-study-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Start Studying Now
+        </button>
+    </div>
+</div>
+
+<script>
+    async function loginOrCreateUser() {
+        const username = document.getElementById('username-input').value;
+        const email = document.getElementById('email-input').value;
+        if (!username || !email) {
+            alert("Please provide both username and email");
+            return;
+        }
+
+        try {
+            // MVP shortcut: try to create, if fails (already exists), we would normally log in.
+            // Since we don't have auth, we just create. If 400, we assume they exist and we need their ID.
+            // For this simple MVP, we will try to create.
+            let res = await fetch('/api/users/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, email})
+            });
+
+            let data = await res.json();
+            let userId = null;
+
+            if (res.ok) {
+                userId = data.id;
+            } else {
+                // If user exists, we have a small issue: our API doesn't expose a GET /by-username endpoint easily without auth or scanning.
+                // For MVP testing, let's just create a unique user each time or expect the user to know their ID.
+                // We will alert for now. In a real app, login handles this.
+                alert("Error: " + data.detail + ". For this MVP, please use a unique username/email.");
+                return;
+            }
+
+            localStorage.setItem('currentUserId', userId);
+            document.getElementById('nav-user-id').innerText = userId.substring(0, 8) + '...';
+            document.getElementById('user-status').classList.remove('hidden');
+
+            await checkDueCards(userId);
+
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred");
+        }
+    }
+
+    async function checkDueCards(userId) {
+        document.getElementById('study-section').classList.remove('hidden');
+        try {
+            const res = await fetch(`/api/study/due/${userId}`);
+            const dueCards = await res.json();
+
+            const countSpan = document.getElementById('due-count');
+            const studyBtn = document.getElementById('start-study-btn');
+
+            countSpan.innerText = dueCards.length;
+
+            if (dueCards.length === 0) {
+                studyBtn.disabled = true;
+                studyBtn.innerText = "No cards due!";
+            } else {
+                studyBtn.disabled = false;
+                studyBtn.innerText = "Start Studying Now";
+            }
+        } catch(error) {
+            console.error("Failed to fetch due cards", error);
+        }
+    }
+
+    function startStudying() {
+        const userId = localStorage.getItem('currentUserId');
+        if (userId) {
+            window.location.href = `/study/${userId}`;
+        }
+    }
+
+    // Auto-load if user is already in localStorage
+    window.onload = () => {
+        const userId = localStorage.getItem('currentUserId');
+        if (userId) {
+            document.getElementById('setup-section').classList.add('hidden');
+            checkDueCards(userId);
+        }
+    };
+</script>
+{% endblock %}
