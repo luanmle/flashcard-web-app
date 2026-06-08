@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routers import users, topics, subtopics, decks, cards, reviews, study, frontend
+from app.api.routers import users, topics, subtopics, decks, cards, reviews, study, analytics, frontend
 
 app = FastAPI(
     title="Flashcards API",
@@ -14,6 +14,7 @@ app.include_router(decks.router, prefix="/api/decks", tags=["decks"])
 app.include_router(cards.router, prefix="/api/cards", tags=["cards"])
 app.include_router(reviews.router, prefix="/api/reviews", tags=["reviews"])
 app.include_router(study.router, prefix="/api/study", tags=["study"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 # Include the frontend router without an API prefix
 app.include_router(frontend.router, tags=["frontend"])

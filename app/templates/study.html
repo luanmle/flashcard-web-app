@@ -119,8 +119,27 @@
             if (res.ok) {
                 currentCardData = await res.json();
 
-                document.getElementById('card-front-content').innerText = currentCardData.front_content;
-                document.getElementById('card-back-content').innerText = currentCardData.back_content;
+                let frontText = currentCardData.front_content;
+                let backText = currentCardData.back_content;
+
+                // Handle Cloze Deletion syntax
+                if (currentCardData.card_type === 'cloze') {
+                    // Extract the hidden word if not provided explicitly in back_content
+                    const clozeMatch = frontText.match(/\{\{c1::(.*?)\}\}/);
+                    if (clozeMatch) {
+                        const hiddenWord = clozeMatch[1];
+                        frontText = frontText.replace(/\{\{c1::.*?\}\}/g, '[...]');
+                        if (!backText) {
+                            backText = hiddenWord;
+                        } else {
+                            // If backText has something, ensure the cloze word is bolded or visible
+                            backText = backText + `\n\n(Cloze: ${hiddenWord})`;
+                        }
+                    }
+                }
+
+                document.getElementById('card-front-content').innerText = frontText;
+                document.getElementById('card-back-content').innerText = backText;
 
                 if (currentCardData.tags) {
                     document.getElementById('card-tags').innerText = currentCardData.tags;
