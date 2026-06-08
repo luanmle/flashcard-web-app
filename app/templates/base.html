@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Flashcards SRS{% endblock %}</title>
+    <!-- daisyUI CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <!-- Tailwind CSS CDN for MVP styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -25,18 +27,20 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
-    <nav class="bg-blue-600 p-4 text-white shadow-md">
+<body class="bg-base-200 min-h-screen text-base-content">
+    <div class="navbar bg-primary text-primary-content shadow-md">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="/dashboard" class="text-xl font-bold">Flashcards SRS</a>
+            <a href="/dashboard" class="btn btn-ghost text-xl font-bold">Flashcards SRS</a>
             <div>
                 <!-- Simulated logged-in user context -->
-                <span class="mr-4">User ID: <span id="nav-user-id" class="font-mono text-sm bg-blue-700 px-2 py-1 rounded"></span></span>
+                <div class="badge badge-secondary badge-outline mr-4 gap-2">
+                    User: <span id="nav-user-id" class="font-mono text-xs font-bold"></span>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <main class="container mx-auto p-4 mt-6">
+    <main class="container mx-auto p-4 md:p-8 mt-6">
         {% block content %}{% endblock %}
     </main>
 

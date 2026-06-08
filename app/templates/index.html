@@ -3,73 +3,127 @@
 {% block title %}Dashboard - Flashcards SRS{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
+<div class="max-w-5xl mx-auto space-y-8">
 
-    <div id="setup-section" class="mb-8 p-4 border border-blue-200 bg-blue-50 rounded-lg">
-        <h2 class="text-xl font-semibold mb-2">1. Select or Create User</h2>
-        <div class="flex gap-2">
-            <input type="text" id="username-input" placeholder="Enter username" class="border p-2 rounded flex-1">
-            <input type="email" id="email-input" placeholder="Enter email" class="border p-2 rounded flex-1">
-            <button onclick="loginOrCreateUser()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Set User</button>
+    <!-- User Setup Card -->
+    <div id="setup-section" class="card bg-base-100 shadow-xl border border-primary">
+        <div class="card-body">
+            <h2 class="card-title text-primary">1. Select or Create User</h2>
+            <div class="flex flex-col md:flex-row gap-4 mt-4">
+                <input type="text" id="username-input" placeholder="Enter username" class="input input-bordered flex-1">
+                <input type="email" id="email-input" placeholder="Enter email" class="input input-bordered flex-1">
+                <button onclick="loginOrCreateUser()" class="btn btn-primary">Set User</button>
+            </div>
+            <p id="user-status" class="text-sm mt-2 text-success hidden">User set successfully!</p>
         </div>
-        <p id="user-status" class="text-sm mt-2 text-green-600 hidden">User set successfully!</p>
     </div>
 
-    <div id="study-section" class="hidden">
-        <h2 class="text-2xl font-semibold mb-4">Study Session</h2>
+    <!-- Study Section (SmartDecks) -->
+    <div id="study-section" class="hidden space-y-6">
+        <div class="flex justify-between items-center border-b pb-2 border-base-300">
+            <h2 class="text-3xl font-bold">Your SmartDecks</h2>
+            <!-- Modal trigger -->
+            <button class="btn btn-outline btn-secondary" onclick="document.getElementById('create_smartdeck_modal').showModal()">
+                + Create SmartDeck
+            </button>
+        </div>
 
-        <div class="mb-4 p-4 border rounded-lg bg-gray-50 flex flex-col gap-2">
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Select a SmartDeck (Filter)</label>
-                <select id="smart-deck-select" class="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500" onchange="updateDueCardsCount()">
-                    <option value="">-- All Cards (No Filter) --</option>
-                </select>
+        <div id="smart-decks-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- SmartDeck Cards will be injected here -->
+        </div>
+
+        <div class="divider">OR</div>
+
+        <div class="card bg-base-100 shadow-md border border-base-200">
+            <div class="card-body items-center text-center">
+                <h3 class="card-title">Create Content</h3>
+                <p class="text-base-content/70">Want to create new flashcards or import data?</p>
+                <div class="card-actions mt-4 w-full">
+                    <button onclick="openStudio()" class="btn btn-neutral w-full">
+                        Open Flashcard Studio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div id="analytics-section" class="hidden space-y-6">
+        <div class="border-b pb-2 border-base-300">
+            <h2 class="text-3xl font-bold">Your Analytics</h2>
+        </div>
+
+        <div class="stats shadow bg-base-100 w-full mb-6">
+            <div class="stat">
+                <div class="stat-title">Total Reviews Completed</div>
+                <div id="total-reviews" class="stat-value text-primary">0</div>
             </div>
         </div>
 
-        <p class="mb-4 text-gray-600">You have <span id="due-count" class="font-bold text-blue-600 text-xl">...</span> cards due today for this selection.</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Chart -->
+            <div class="card bg-base-100 shadow-md">
+                <div class="card-body">
+                    <h3 class="card-title text-lg mb-2">Avg. Hesitation (Seconds) by Topic</h3>
+                    <canvas id="durationChart" height="200"></canvas>
+                </div>
+            </div>
 
-        <button onclick="startStudying()" id="start-study-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
-            Start Studying Now
-        </button>
-
-        <div class="mt-6 pt-6 border-t">
-            <h3 class="text-lg font-semibold mb-2">Create Content</h3>
-            <button onclick="openStudio()" class="w-full bg-blue-100 text-blue-700 font-bold py-3 rounded-lg hover:bg-blue-200 transition-colors">
-                Open Flashcard Studio
-            </button>
+            <!-- Hardest Cards -->
+            <div class="card bg-error/10 border border-error/20 shadow-md">
+                <div class="card-body">
+                    <h3 class="card-title text-error mb-2">Cards You Struggle With (Lowest Ratings)</h3>
+                    <ul id="hardest-cards-list" class="list-disc pl-5 text-sm space-y-2 text-base-content/80">
+                        <!-- Injected via JS -->
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Analytics Section -->
-<div id="analytics-section" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mt-6 hidden">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Your Analytics</h2>
+<!-- Create SmartDeck Modal -->
+<dialog id="create_smartdeck_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Create a New SmartDeck</h3>
 
-    <div class="mb-4">
-        <p class="text-gray-600">Total Reviews Completed: <span id="total-reviews" class="font-bold text-xl text-blue-600">0</span></p>
-    </div>
+        <div class="space-y-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">SmartDeck Name</span></label>
+                <input type="text" id="new-sd-name" placeholder="e.g. My Math Deck" class="input input-bordered w-full" />
+            </div>
 
-    <!-- Chart.js Canvas -->
-    <div class="mb-8">
-        <h3 class="text-lg font-semibold mb-2">Avg. Hesitation (Seconds) by Topic</h3>
-        <canvas id="durationChart" height="100"></canvas>
-    </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Filter by Topic (Optional)</span></label>
+                <select id="new-sd-topic" class="select select-bordered w-full">
+                    <option value="">-- All Topics --</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
 
-    <!-- Hardest Cards Table -->
-    <div>
-        <h3 class="text-lg font-semibold mb-2 text-red-600">Cards You Struggle With (Lowest Ratings)</h3>
-        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
-            <ul id="hardest-cards-list" class="list-disc pl-5 text-sm text-gray-700 space-y-2">
-                <!-- Injected via JS -->
-            </ul>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Filter by Tags (Optional)</span></label>
+                <input type="text" id="new-sd-tags" placeholder="e.g. hard, math, algebra" class="input input-bordered w-full" />
+                <label class="label"><span class="label-text-alt text-base-content/60">Comma-separated</span></label>
+            </div>
+        </div>
+
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn mr-2">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createSmartDeck()">Create</button>
+            </form>
         </div>
     </div>
-</div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 
 <script>
     let durationChartInstance = null;
+
     async function loginOrCreateUser() {
         const username = document.getElementById('username-input').value;
         const email = document.getElementById('email-input').value;
@@ -91,7 +145,7 @@
             if (res.ok) {
                 userId = data.id;
             } else {
-                // Fallback for MVP: fetch all users and find the one that matches
+                // Fallback for MVP
                 const allRes = await fetch('/api/users/');
                 const allUsers = await allRes.json();
                 const existing = allUsers.find(u => u.username === username);
@@ -105,7 +159,14 @@
 
             localStorage.setItem('currentUserId', userId);
             document.getElementById('nav-user-id').innerText = userId.substring(0, 8) + '...';
-            document.getElementById('user-status').classList.remove('hidden');
+
+            const setupSec = document.getElementById('setup-section');
+            const statusMsg = document.getElementById('user-status');
+            statusMsg.classList.remove('hidden');
+
+            setTimeout(() => {
+                setupSec.classList.add('hidden');
+            }, 1000);
 
             await checkDueCards(userId);
             await loadAnalytics(userId);
@@ -118,30 +179,72 @@
 
     async function checkDueCards(userId) {
         document.getElementById('study-section').classList.remove('hidden');
-        await populateSmartDecksFilter(userId);
-        await updateDueCardsCount();
+        await renderSmartDecks(userId);
     }
 
-    async function populateSmartDecksFilter(userId) {
-        try {
-            const res = await fetch(`/api/smart-decks/user/${userId}`);
-            const smartDecks = await res.json();
+    async function renderSmartDecks(userId) {
+        const grid = document.getElementById('smart-decks-grid');
+        grid.innerHTML = '<span class="loading loading-spinner loading-lg text-primary"></span>';
 
-            const select = document.getElementById('smart-deck-select');
-            select.innerHTML = '<option value="">-- All Cards (No Filter) --</option>';
-            smartDecks.forEach(d => {
-                select.innerHTML += `<option value="${d.id}">${d.name}</option>`;
-            });
+        try {
+            // Populate the "All Topics" dropdown in the modal for convenience
+            fetchTopicsForModal();
+
+            const res = await fetch(`/api/smart-decks/user/${userId}`);
+            let smartDecks = [];
+            if(res.ok) {
+                smartDecks = await res.json();
+            }
+
+            grid.innerHTML = '';
+
+            // Render an "All Cards" default card
+            grid.appendChild(createSmartDeckCardElement({
+                id: '',
+                name: 'All Cards (No Filter)',
+                isAll: true
+            }, userId));
+
+            // Render user's SmartDecks
+            for (const deck of smartDecks) {
+                grid.appendChild(createSmartDeckCardElement(deck, userId));
+            }
+
         } catch (e) {
             console.error("Failed to load SmartDecks", e);
+            grid.innerHTML = '<p class="text-error">Failed to load SmartDecks.</p>';
         }
     }
 
-    async function updateDueCardsCount() {
-        const userId = localStorage.getItem('currentUserId');
-        if (!userId) return;
+    function createSmartDeckCardElement(deck, userId) {
+        const card = document.createElement('div');
+        card.className = "card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-shadow";
 
-        const smartDeckId = document.getElementById('smart-deck-select').value;
+        // We will fetch due cards asynchronously for each
+        const dueCountId = `due-count-${deck.id || 'all'}`;
+        const btnId = `btn-study-${deck.id || 'all'}`;
+
+        card.innerHTML = `
+            <div class="card-body">
+                <h3 class="card-title text-primary">${deck.name}</h3>
+                <p class="text-sm text-base-content/70 mb-4">
+                    Cards Due: <span id="${dueCountId}" class="loading loading-dots loading-xs"></span>
+                </p>
+                <div class="card-actions justify-end mt-auto">
+                    <button id="${btnId}" onclick="startStudying('${deck.id}')" class="btn btn-primary w-full" disabled>
+                        Loading...
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Fetch due cards for this specific deck
+        updateDueCardsCountForCard(userId, deck.id, dueCountId, btnId);
+
+        return card;
+    }
+
+    async function updateDueCardsCountForCard(userId, smartDeckId, dueCountId, btnId) {
         let url = `/api/study/due/${userId}`;
         if (smartDeckId) {
             url += `?smart_deck_id=${smartDeckId}`;
@@ -151,20 +254,82 @@
             const res = await fetch(url);
             const dueCards = await res.json();
 
-            const countSpan = document.getElementById('due-count');
-            const studyBtn = document.getElementById('start-study-btn');
+            const countSpan = document.getElementById(dueCountId);
+            const studyBtn = document.getElementById(btnId);
 
-            countSpan.innerText = dueCards.length;
+            if(countSpan) countSpan.outerHTML = `<span class="font-bold text-lg text-secondary">${dueCards.length}</span>`;
 
-            if (dueCards.length === 0) {
-                studyBtn.disabled = true;
-                studyBtn.innerText = "No cards due!";
-            } else {
-                studyBtn.disabled = false;
-                studyBtn.innerText = "Start Studying Now";
+            if (studyBtn) {
+                if (dueCards.length === 0) {
+                    studyBtn.disabled = true;
+                    studyBtn.innerText = "No cards due";
+                    studyBtn.classList.replace('btn-primary', 'btn-disabled');
+                } else {
+                    studyBtn.disabled = false;
+                    studyBtn.innerText = "Study Now";
+                }
             }
         } catch(error) {
             console.error("Failed to fetch due cards", error);
+            const countSpan = document.getElementById(dueCountId);
+            if(countSpan) countSpan.innerText = "Error";
+        }
+    }
+
+    async function fetchTopicsForModal() {
+        try {
+            const res = await fetch('/api/topics/');
+            const topics = await res.json();
+            const select = document.getElementById('new-sd-topic');
+            select.innerHTML = '<option value="">-- All Topics --</option>';
+            topics.forEach(t => {
+                select.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function createSmartDeck() {
+        const userId = localStorage.getItem('currentUserId');
+        const name = document.getElementById('new-sd-name').value.trim();
+        const topic = document.getElementById('new-sd-topic').value;
+        const tags = document.getElementById('new-sd-tags').value.trim();
+
+        if(!name) {
+            alert("SmartDeck name is required.");
+            return;
+        }
+
+        // Build filter criteria based on current backend expectations
+        // This assumes a JSONB structure like {"topics": ["Math"], "tags": ["hard"]}
+        let filter_criteria = {};
+        if (topic) filter_criteria.topics = [topic];
+        if (tags) filter_criteria.tags = tags.split(',').map(t => t.trim()).filter(t => t);
+
+        try {
+            const res = await fetch('/api/smart-decks/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    user_id: userId,
+                    name: name,
+                    filter_criteria: filter_criteria
+                })
+            });
+
+            if(res.ok) {
+                document.getElementById('create_smartdeck_modal').close();
+                document.getElementById('new-sd-name').value = '';
+                document.getElementById('new-sd-topic').value = '';
+                document.getElementById('new-sd-tags').value = '';
+                // Reload decks
+                await renderSmartDecks(userId);
+            } else {
+                const data = await res.json();
+                alert(data.detail || "Error creating SmartDeck");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network error.");
         }
     }
 
@@ -182,16 +347,14 @@
             listEl.innerHTML = "";
             if (data.hardest_cards && data.hardest_cards.length > 0) {
                 data.hardest_cards.forEach(card => {
-                    listEl.innerHTML += `<li><strong>[Rating ${card.avg_rating}]</strong> ${card.card_front}</li>`;
+                    listEl.innerHTML += `<li><span class="badge badge-error badge-sm mr-2">Rating ${card.avg_rating}</span> ${card.card_front}</li>`;
                 });
             } else {
-                listEl.innerHTML = "<li>No data available yet. Keep studying!</li>";
+                listEl.innerHTML = "<li class='text-success'>No data available yet. Keep studying!</li>";
             }
 
             // Render Chart.js
             const ctx = document.getElementById('durationChart').getContext('2d');
-
-            // Destroy previous instance if it exists
             if (durationChartInstance) {
                 durationChartInstance.destroy();
             }
@@ -207,21 +370,17 @@
                         datasets: [{
                             label: 'Avg Duration (s)',
                             data: durations,
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1
+                            backgroundColor: 'rgba(87, 13, 248, 0.6)', // matches daisyui primary approx
+                            borderColor: 'rgba(87, 13, 248, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
                         }]
                     },
                     options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
+                        scales: { y: { beginAtZero: true } }
                     }
                 });
             } else {
-                // Clear canvas or show message
                 durationChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: { labels: ['No data'], datasets: [{ data: [0] }] }
@@ -232,9 +391,8 @@
         }
     }
 
-    function startStudying() {
+    function startStudying(smartDeckId) {
         const userId = localStorage.getItem('currentUserId');
-        const smartDeckId = document.getElementById('smart-deck-select').value;
         if (userId) {
             let url = `/study/${userId}`;
             if (smartDeckId) url += `?smart_deck_id=${smartDeckId}`;
