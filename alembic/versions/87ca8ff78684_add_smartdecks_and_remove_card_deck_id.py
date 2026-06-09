@@ -32,7 +32,9 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_smart_decks_filter_criteria_gin', 'smart_decks', ['filter_criteria'], unique=False, postgresql_using='gin')
-    op.drop_constraint(None, 'cards', type_='foreignkey')
+
+    # We must explicitly name the Postgres constraint
+    op.drop_constraint('cards_deck_id_fkey', 'cards', type_='foreignkey')
     op.drop_column('cards', 'deck_id')
     # ### end Alembic commands ###
 

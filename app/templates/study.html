@@ -107,6 +107,20 @@
     let cardFlippedAtTime = 0;
     let isFlipped = false;
 
+    // XSS Sanitizer helper
+    function escapeHTML(str) {
+        if (!str) return "";
+        return str.replace(/[&<>'"]/g,
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag)
+        );
+    }
+
     // 1. Fetch due cards on load
     window.onload = async () => {
         try {
@@ -170,20 +184,26 @@
             if (res.ok) {
                 currentCardData = await res.json();
 
-                let frontText = currentCardData.front_content;
-                let backText = currentCardData.back_content;
+                // Sanitize input to prevent Stored XSS before innerHTML injection
+                let frontText = escapeHTML(currentCardData.front_content);
+                let backText = escapeHTML(currentCardData.back_content);
 
                 // Handle Cloze Deletion syntax
                 if (currentCardData.card_type === 'cloze') {
                     // Extract the hidden word if not provided explicitly in back_content
+                    // We match against the *already escaped* frontText
                     const clozeMatch = frontText.match(/\{\{c1::(.*?)\}\}/);
                     if (clozeMatch) {
                         const hiddenWord = clozeMatch[1];
+
+                        // Replace all cloze instances on the front with [...]
                         frontText = frontText.replace(/\{\{c1::.*?\}\}/g, '[...]');
 
-                        // We use innerHTML to render styling
+                        // We use innerHTML to render styling for the back
                         const highlightHtml = `<span class="bg-yellow-200 text-yellow-900 font-bold px-2 py-1 rounded">${hiddenWord}</span>`;
-                        const originalFrontWithHighlight = currentCardData.front_content.replace(/\{\{c1::.*?\}\}/g, highlightHtml);
+
+                        // Replace ALL cloze patterns with the highlighted HTML (using $1 was missing)
+                        const originalFrontWithHighlight = escapeHTML(currentCardData.front_content).replace(/\{\{c1::(.*?)\}\}/g, `<span class="bg-yellow-200 text-yellow-900 font-bold px-2 py-1 rounded">$1</span>`);
 
                         if (!backText) {
                             backText = originalFrontWithHighlight;
