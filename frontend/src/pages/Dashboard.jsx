@@ -4,6 +4,16 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import {
+  UserGroupIcon,
+  CreditCardIcon,
+  CircleStackIcon,
+  UsersIcon,
+  PlusCircleIcon,
+  ListBulletIcon,
+  ExclamationCircleIcon,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -42,8 +52,7 @@ function Dashboard() {
       setAnalytics(analyticsRes.data);
       setTopics(topicsRes.data);
 
-      // Fetch due counts for each deck
-      fetchDueCount(''); // All cards
+      fetchDueCount('');
       sdRes.data.forEach(deck => fetchDueCount(deck.id));
 
     } catch (err) {
@@ -83,7 +92,7 @@ function Dashboard() {
       setNewSdName('');
       setNewSdTopic('');
       setNewSdTags('');
-      fetchData(); // Refresh data
+      fetchData();
     } catch (err) {
       alert(err.response?.data?.detail || "Error creating SmartDeck");
     }
@@ -133,55 +142,58 @@ function Dashboard() {
   const allDecksToRender = [allCardsDeck, ...smartDecks];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <>
       {/* Top Stats */}
       <div className="grid lg:grid-cols-4 mt-2 md:grid-cols-2 grid-cols-1 gap-6">
-        <div className="stats shadow bg-base-100">
+
+        <div className="stats shadow">
           <div className="stat">
-            <div className="stat-figure text-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+            <div className="stat-figure dark:text-slate-300 text-primary">
+              <CheckCircleIcon className='w-8 h-8'/>
             </div>
-            <div className="stat-title text-base-content/70">Total Reviews</div>
-            <div className="stat-value text-primary">{analytics?.total_reviews || 0}</div>
-            <div className="stat-desc font-bold text-success">Keep it up!</div>
+            <div className="stat-title dark:text-slate-300">Total Reviews</div>
+            <div className="stat-value dark:text-slate-300 text-primary">{analytics?.total_reviews || 0}</div>
+            <div className="stat-desc font-bold text-green-700 dark:text-green-300">Keep it up!</div>
           </div>
         </div>
 
-        <div className="stats shadow bg-base-100">
+        <div className="stats shadow">
           <div className="stat">
-            <div className="stat-figure text-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+            <div className="stat-figure dark:text-slate-300 text-secondary">
+              <RectangleStackIcon className='w-8 h-8'/>
             </div>
-            <div className="stat-title text-base-content/70">SmartDecks</div>
-            <div className="stat-value text-secondary">{smartDecks.length}</div>
-            <div className="stat-desc text-base-content/60">Custom Filters</div>
+            <div className="stat-title dark:text-slate-300">SmartDecks</div>
+            <div className="stat-value dark:text-slate-300 text-secondary">{smartDecks.length}</div>
+            <div className="stat-desc">Custom Filters active</div>
           </div>
         </div>
 
-        <div className="stats shadow bg-base-100">
+        <div className="stats shadow">
           <div className="stat">
-            <div className="stat-figure text-accent">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <div className="stat-figure dark:text-slate-300 text-accent">
+              <ExclamationCircleIcon className='w-8 h-8'/>
             </div>
-            <div className="stat-title text-base-content/70">Hardest Topic</div>
-            <div className="stat-value text-accent text-xl">{hardestTopic}</div>
-            <div className="stat-desc text-base-content/60">Needs attention</div>
+            <div className="stat-title dark:text-slate-300">Hardest Topic</div>
+            <div className="stat-value dark:text-slate-300 text-accent text-xl mt-1">{hardestTopic}</div>
+            <div className="stat-desc font-bold text-rose-500 dark:text-red-400">Needs attention</div>
           </div>
         </div>
 
-        <div className="stats shadow bg-base-100 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => modalRef.current.showModal()}>
+        <div className="stats shadow cursor-pointer hover:shadow-lg transition-shadow bg-primary text-primary-content" onClick={() => modalRef.current.showModal()}>
           <div className="stat flex flex-col items-center justify-center h-full">
-            <div className="text-primary opacity-80">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-10 h-10"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <div className="opacity-90">
+              <PlusCircleIcon className="w-10 h-10" />
             </div>
-            <div className="stat-title font-semibold text-primary mt-1">Create SmartDeck</div>
+            <div className="stat-title font-semibold mt-1 text-primary-content opacity-100">Create SmartDeck</div>
           </div>
         </div>
       </div>
 
       {/* SmartDecks Grid */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4 text-base-content">Study Queues</h2>
+        <h2 className="text-xl font-semibold mb-4 text-base-content flex items-center gap-2">
+          <ListBulletIcon className="w-6 h-6"/> Study Queues
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {allDecksToRender.map(deck => {
             const count = dueCounts[deck.id];
@@ -192,20 +204,19 @@ function Dashboard() {
               <div key={deck.id || 'all'} className="card bg-base-100 shadow-md border border-base-200 hover:shadow-lg transition-shadow">
                 <div className="card-body p-6">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="card-title text-base-content">{deck.name}</h3>
-                    <div className="badge badge-ghost badge-sm">{deck.isAll ? 'System' : 'Custom'}</div>
+                    <h3 className="card-title text-base-content font-bold">{deck.name}</h3>
+                    <div className="badge badge-ghost badge-sm font-semibold">{deck.isAll ? 'System' : 'Custom'}</div>
                   </div>
 
-                  <p className="text-sm text-base-content/60 mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
-                    Due Today:
+                  <div className="text-sm text-base-content/60 mb-4 flex flex-col">
+                    <span className="font-semibold mb-1">Due Today:</span>
                     {!isLoaded ? (
-                      <span className="loading loading-dots loading-xs ml-1"></span>
+                      <span className="loading loading-dots loading-xs"></span>
                     ) : (
-                      <span className="font-bold text-md text-secondary ml-1">{count}</span>
+                      <span className="font-bold text-3xl text-secondary">{count}</span>
                     )}
-                  </p>
-                  <div className="card-actions mt-auto pt-2 border-t border-base-200">
+                  </div>
+                  <div className="card-actions mt-auto pt-4 border-t border-base-200">
                     <button
                       onClick={() => navigate(deck.id ? `/study/${userId}?smart_deck_id=${deck.id}` : `/study/${userId}`)}
                       className={`btn btn-sm w-full ${hasCards ? 'btn-primary' : 'btn-ghost'}`}
@@ -225,7 +236,7 @@ function Dashboard() {
       <div className="grid lg:grid-cols-2 mt-8 grid-cols-1 gap-6">
         <div className="card bg-base-100 shadow-md">
           <div className="card-body">
-            <h3 className="card-title text-lg mb-2 font-normal text-base-content/80">Avg. Hesitation (Seconds) by Topic</h3>
+            <h3 className="card-title text-lg mb-2 font-semibold">Avg. Hesitation (s) by Topic</h3>
             <div className="w-full h-64">
               <Bar data={chartData} options={chartOptions} />
             </div>
@@ -234,7 +245,7 @@ function Dashboard() {
 
         <div className="card bg-base-100 shadow-md">
           <div className="card-body">
-            <h3 className="card-title text-lg mb-2 font-normal text-base-content/80">Cards You Struggle With (Lowest Ratings)</h3>
+            <h3 className="card-title text-lg mb-2 font-semibold text-rose-500">Lowest Rated Cards</h3>
             <div className="overflow-x-auto">
               <table className="table table-zebra w-full">
                 <thead>
@@ -247,12 +258,12 @@ function Dashboard() {
                   {analytics?.hardest_cards?.length > 0 ? (
                     analytics.hardest_cards.map((card, i) => (
                       <tr key={i}>
-                        <td><span className="badge badge-error badge-sm">{card.avg_rating}</span></td>
+                        <td><span className="badge badge-error badge-sm font-semibold">{card.avg_rating}</span></td>
                         <td className="text-sm truncate max-w-xs">{card.card_front}</td>
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan="2" className="text-success">No data available yet. Keep studying!</td></tr>
+                    <tr><td colSpan="2" className="text-success font-semibold">No data available yet. Keep studying!</td></tr>
                   )}
                 </tbody>
               </table>
@@ -286,7 +297,7 @@ function Dashboard() {
           <div className="modal-action">
             <form method="dialog">
               <button className="btn btn-ghost mr-2">Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={handleCreateSmartDeck}>Save SmartDeck</button>
+              <button type="button" className="btn btn-primary" onClick={handleCreateSmartDeck}>Save</button>
             </form>
           </div>
         </div>
@@ -294,7 +305,7 @@ function Dashboard() {
           <button>close</button>
         </form>
       </dialog>
-    </div>
+    </>
   );
 }
 
